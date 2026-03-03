@@ -13,18 +13,61 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-        html, body, #map {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-        }
+            html, body, #map {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                background: #f8f9fa;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            }
+
+            /* Cantikkan Tooltip & Popup */
+            .leaflet-popup-content-wrapper {
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                padding: 2px;
+            }
+            
+            .leaflet-popup-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 5px 0;
+            }
+
+            .leaflet-popup-content td {
+                padding: 6px 10px;
+                border-bottom: 1px solid #eee;
+                font-size: 13px;
+                color: #333;
+            }
+
+            .leaflet-popup-content b, 
+            .leaflet-popup-content strong {
+                color: #2c3e50;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            /* Custom Search Button */
+            .leaflet-control-search .search-button {
+                background-color: #fff !important;
+                border: 2px solid rgba(0,0,0,0.2) !important;
+                border-radius: 4px !important;
+            }
+
+            /* Layer Control Design */
+            .leaflet-control-layers {
+                border-radius: 8px !important;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            }
         </style>
-        <title></title>
+        <title>Sistem Maklumat Lot Tanah</title>
     </head>
     <body>
-        <div id="map">
-        </div>
+        <div id="map"></div>
+
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -39,244 +82,162 @@
         <script src="js/leaflet-search.js"></script>
         <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
+
         <script>
-        var highlightLayer;
-        function highlightFeature(e) {
-            highlightLayer = e.target;
-            highlightLayer.openPopup();
-        }
         var map = L.map('map', {
-            zoomControl:false, maxZoom:28, minZoom:1
+            zoomControl: true, 
+            maxZoom: 28, 
+            minZoom: 1
         }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
+
         var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        // remove popup's row if "visible-with-data"
-        function removeEmptyRowsFromPopupContent(content, feature) {
-         var tempDiv = document.createElement('div');
-         tempDiv.innerHTML = content;
-         var rows = tempDiv.querySelectorAll('tr');
-         for (var i = 0; i < rows.length; i++) {
-             var td = rows[i].querySelector('td.visible-with-data');
-             var key = td ? td.id : '';
-             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                 rows[i].parentNode.removeChild(rows[i]);
-             }
-         }
-         return tempDiv.innerHTML;
-        }
-        // modify popup if contains media
-        function addClassToPopupIfMedia(content, popup) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var imgTd = tempDiv.querySelector('td img');
-            if (imgTd) {
-                var src = imgTd.getAttribute('src');
-                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
-                    popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.update();
-                    }, 10);
-                } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
-                    var audio = document.createElement('audio');
-                    audio.controls = true;
-                    audio.src = src;
-                    imgTd.parentNode.replaceChild(audio, imgTd);
-                    popup._contentNode.classList.add('media');
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
-                } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
-                    var video = document.createElement('video');
-                    video.controls = true;
-                    video.src = src;
-                    video.style.width = "400px";
-                    video.style.height = "300px";
-                    video.style.maxHeight = "60vh";
-                    video.style.maxWidth = "60vw";
-                    imgTd.parentNode.replaceChild(video, imgTd);
-                    popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
-                    video.addEventListener('loadedmetadata', function() {
-                        popup.update();
-                    });
-                    setTimeout(function() {
-                        popup.setContent(tempDiv.innerHTML);
-                        popup.update();
-                    }, 10);
-                } else {
-                    popup._contentNode.classList.remove('media');
-                }
-            } else {
-                popup._contentNode.classList.remove('media');
+        map.attributionControl.setPrefix('Kemaskini 2026');
+
+        // --- LAYER BASEMAP (TAMBAHAN) ---
+        var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3'],
+            attribution: '© Google Satellite'
+        }).addTo(map);
+
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        });
+
+        // --- FUNGSI HIGHLIGHT ---
+        function highlightFeature(e) {
+            var layer = e.target;
+            layer.setStyle({
+                weight: 3,
+                color: '#f1c40f',
+                fillOpacity: 0.7
+            });
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
             }
         }
-        var zoomControl = L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {
+
+        function resetHighlight(e) {
+            layer_finallot_1.resetStyle(e.target);
         }
+
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
+        function removeEmptyRowsFromPopupContent(content, feature) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var td = rows[i].querySelector('td.visible-with-data');
+                var key = td ? td.id : '';
+                if (td && feature.properties[key] == null) {
+                    rows[i].parentNode.removeChild(rows[i]);
+                }
+            }
+            return tempDiv.innerHTML;
+        }
+
+        // --- LAYER 0: BKLMERGE (POINTS) ---
         function pop_bklmerge_0(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
-                mouseover: highlightFeature,
-            });
             var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(String(feature.properties['fid']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['U'] !== null ? autolinker.link(String(feature.properties['U']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['B'] !== null ? autolinker.link(String(feature.properties['B']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['layer'] !== null ? autolinker.link(String(feature.properties['layer']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['path'] !== null ? autolinker.link(String(feature.properties['path']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
+                    <tr><td colspan="2"><b>Fid:</b><br>' + (feature.properties['fid'] || '-') + '</td></tr>\
+                    <tr><td colspan="2"><b>U:</b><br>' + (feature.properties['U'] || '-') + '</td></tr>\
+                    <tr><td colspan="2"><b>B:</b><br>' + (feature.properties['B'] || '-') + '</td></tr>\
                 </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.bindPopup(popupContent, {maxHeight: 400});
         }
 
         function style_bklmerge_0_0() {
             return {
-                pane: 'pane_bklmerge_0',
-                radius: 4.0,
+                radius: 5.0,
                 opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1,
+                color: 'white',
+                weight: 2,
                 fill: true,
                 fillOpacity: 1,
-                fillColor: 'rgba(145,82,45,1.0)',
+                fillColor: '#e74c3c', // Warna merah cerah
                 interactive: true,
             }
         }
+
         map.createPane('pane_bklmerge_0');
-        map.getPane('pane_bklmerge_0').style.zIndex = 400;
-        map.getPane('pane_bklmerge_0').style['mix-blend-mode'] = 'normal';
+        map.getPane('pane_bklmerge_0').style.zIndex = 450;
+
         var layer_bklmerge_0 = new L.geoJson(json_bklmerge_0, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_bklmerge_0',
-            layerName: 'layer_bklmerge_0',
             pane: 'pane_bklmerge_0',
             onEachFeature: pop_bklmerge_0,
             pointToLayer: function (feature, latlng) {
-                var context = {
-                    feature: feature,
-                    variables: {}
-                };
-                return L.circleMarker(latlng, style_bklmerge_0_0(feature));
+                return L.circleMarker(latlng, style_bklmerge_0_0());
             },
         });
-        bounds_group.addLayer(layer_bklmerge_0);
         map.addLayer(layer_bklmerge_0);
+
+        // --- LAYER 1: FINALLOT (POLYGONS) ---
         function pop_finallot_1(feature, layer) {
             layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
                 mouseover: highlightFeature,
+                mouseout: resetHighlight,
             });
+
             var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(String(feature.properties['fid']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO_LOT</strong><br />' + (feature.properties['NO_LOT'] !== null ? autolinker.link(String(feature.properties['NO_LOT']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['AREA'] !== null ? autolinker.link(String(feature.properties['AREA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['layer'] !== null ? autolinker.link(String(feature.properties['layer']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['path'] !== null ? autolinker.link(String(feature.properties['path']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — ha'] !== null ? autolinker.link(String(feature.properties['tsp — ha']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — _1'] !== null ? autolinker.link(String(feature.properties['tsp — _1']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2">' + (feature.properties['tsp — pe'] !== null ? autolinker.link(String(feature.properties['tsp — pe']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
+                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO LOT</strong><br />' + (feature.properties['NO_LOT'] || 'N/A') + '</td></tr>\
+                    <tr><td colspan="2"><strong>KELUASAN (HA)</strong><br />' + (feature.properties['AREA'] || '-') + '</td></tr>\
+                    <tr><td colspan="2"><strong>INFO TAMBAHAN</strong><br />' + (feature.properties['tsp — ha'] || '-') + '</td></tr>\
                 </table>';
+            
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
+            layer.bindPopup(content, {maxHeight: 400});
         }
 
         function style_finallot_1_0() {
             return {
                 pane: 'pane_finallot_1',
                 opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
+                color: '#ffffff', // Garisan putih
+                weight: 1.5,
                 fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(213,180,60,1.0)',
+                fillOpacity: 0.4,
+                fillColor: '#3498db', // Warna biru moden
                 interactive: true,
             }
         }
+
         map.createPane('pane_finallot_1');
         map.getPane('pane_finallot_1').style.zIndex = 401;
-        map.getPane('pane_finallot_1').style['mix-blend-mode'] = 'normal';
+
         var layer_finallot_1 = new L.geoJson(json_finallot_1, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_finallot_1',
-            layerName: 'layer_finallot_1',
             pane: 'pane_finallot_1',
             onEachFeature: pop_finallot_1,
             style: style_finallot_1_0,
         });
-        bounds_group.addLayer(layer_finallot_1);
         map.addLayer(layer_finallot_1);
-        setBounds();
+
+        // --- KAWALAN LAYER & CARIAN ---
+        var baseMaps = {
+            "Satelit (Google)": googleSat,
+            "Peta Jalan (OSM)": osm
+        };
+
+        var overlayMaps = {
+            "Sempadan Lot": layer_finallot_1,
+            "Titik BKL": layer_bklmerge_0
+        };
+
+        L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
+
         map.addControl(new L.Control.Search({
             layer: layer_finallot_1,
             initial: false,
             hideMarkerOnCollapse: true,
-            propertyName: 'NO_LOT'}));
-        if (typeof url === 'undefined') {
-            document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
-        } else {
-            document.getElementsByClassName('search-button')[1].className += ' fa fa-binoculars';
-        }
-        </script>        
+            propertyName: 'NO_LOT',
+            moveToLocation: function(latlng, title, map) {
+                map.setView(latlng, 19); // Zoom lebih dekat bila jumpa lot
+            }
+        }));
+
+        // Tambah Icon Binoculars pada butang Search
+        document.getElementsByClassName('search-button')[0].innerHTML = '<i class="fa fa-binoculars" style="padding:7px"></i>';
+
+        </script>
     </body>
 </html>
