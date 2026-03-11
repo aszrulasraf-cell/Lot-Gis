@@ -21,30 +21,36 @@
 
             /* --- HEADER HIJAU --- */
             header {
-                height: 65px; background-color: #2d5a27;
+                height: 70px; background-color: #2d5a27;
                 display: flex; align-items: center; justify-content: center;
                 z-index: 1002; position: relative;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             }
 
             .header-box {
-                background: white; padding: 5px 20px; border-radius: 4px;
-                display: flex; align-items: center; gap: 12px;
+                background: white; padding: 5px 25px; border-radius: 50px; /* Bentuk bujur lebih moden */
+                display: flex; align-items: center; gap: 15px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             }
 
-            /* Logo dilaraskan agar muat dan jelas */
+            /* Gunakan logo_politeknik.png anda */
             .header-box img {
-                height: 35px; width: auto; display: block;
+                height: 45px; /* Saiz lebih besar sedikit supaya jelas */
+                width: auto; 
+                display: block;
+                object-fit: contain;
             }
 
             .site-title {
-                font-family: 'Brush Script MT', cursive;
-                font-size: 26px; color: #2d5a27; line-height: 1;
-                font-style: italic;
+                font-family: 'Trebuchet MS', sans-serif;
+                font-size: 22px; color: #2d5a27; 
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             /* --- LAYOUT UTAMA --- */
-            #main-container { display: flex; height: calc(100vh - 65px); width: 100%; }
+            #main-container { display: flex; height: calc(100vh - 70px); width: 100%; }
             #map { flex-grow: 1; height: 100%; background: #111; }
 
             /* --- SIDEBAR DARK MODE --- */
@@ -75,10 +81,8 @@
 
         <header>
             <div class="header-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/logo_politeknik.png" 
-                     onerror="this.src='https://seeklogo.com/images/P/politeknik-malaysia-logo-92E83E4C9F-seeklogo.com.png'" 
-                     alt="Logo Politeknik">
-                <span class="site-title">casual resident</span>
+                <img src="logo_politeknik.png" alt="Logo Politeknik Malaysia">
+                <span class="site-title">Land Info System</span>
             </div>
         </header>
 
@@ -140,7 +144,7 @@
                             </div>
                             <div class="data-item">
                                 <div class="data-label">NAMA PEMILIK</div>
-                                <div class="div-value">POLITEKNIK MALAYSIA</div>
+                                <div class="data-value">POLITEKNIK MALAYSIA</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-label">LUAS LOT</div>
