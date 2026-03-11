@@ -14,63 +14,155 @@
 
         <style>
             html, body {
-                width: 100%; height: 100%; padding: 0; margin: 0;
-                overflow: hidden; font-family: 'Segoe UI', Roboto, sans-serif;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
+                font-family: 'Segoe UI', Roboto, sans-serif;
                 background-color: #000;
             }
 
-            /* --- HEADER HIJAU --- */
+            /* --- HEADER HIJAU (MENGIKUT GAMBAR) --- */
             header {
-                height: 65px; background-color: #2d5a27;
-                display: flex; align-items: center; justify-content: center;
-                z-index: 1002; position: relative;
+                height: 65px;
+                background-color: #2d5a27; /* Hijau Politeknik */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1002;
+                position: relative;
             }
 
             .header-box {
-                background: white; padding: 5px 20px; border-radius: 4px;
-                display: flex; align-items: center; gap: 12px;
+                background: white;
+                padding: 5px 20px;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             }
 
-            /* Saiz logo diperkemas */
+            /* Logo Poli (Saiz Kecil Seperti Dalam Gambar) */
             .header-box img {
-                height: 30px; width: auto; display: block;
+                height: 28px; 
+                width: auto;
             }
 
             .site-title {
                 font-family: 'Brush Script MT', cursive;
-                font-size: 26px; color: #2d5a27; line-height: 1;
-                font-style: italic;
+                font-size: 26px;
+                color: #2d5a27;
+                font-weight: normal;
+                line-height: 1;
             }
 
-            #main-container { display: flex; height: calc(100vh - 65px); width: 100%; }
-            #map { flex-grow: 1; height: 100%; background: #111; }
+            /* --- LAYOUT UTAMA --- */
+            #main-container {
+                display: flex;
+                height: calc(100vh - 65px);
+                width: 100%;
+            }
 
+            #map {
+                flex-grow: 1;
+                height: 100%;
+                background: #111;
+            }
+
+            /* --- SIDEBAR KANAN DARK MODE --- */
             #sidebar {
-                width: 320px; background: #1a1c23; color: #ffffff;
-                padding: 15px; display: flex; flex-direction: column; gap: 12px;
-                z-index: 1001; border-left: 1px solid #333; overflow-y: auto;
+                width: 320px;
+                background: #1a1c23; /* Kelabu Sangat Gelap */
+                color: #ffffff;
+                padding: 15px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                z-index: 1001;
+                border-left: 1px solid #333;
+                overflow-y: auto;
             }
 
-            .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; }
-            .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; }
+            .sidebar-section {
+                background: #242731; /* Kelabu Cerah Sedikit */
+                padding: 15px;
+                border-radius: 8px;
+            }
 
-            .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
-            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
-            .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; }
+            .section-header {
+                font-size: 13px;
+                font-weight: bold;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #bdc3c7;
+            }
 
-            .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 8px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+            /* --- DATA DISPLAY --- */
+            .data-item {
+                margin-bottom: 12px;
+                border-bottom: 1px solid #333;
+                padding-bottom: 8px;
+            }
+
+            .data-label {
+                font-size: 9px;
+                color: #7f8c8d;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .data-value {
+                font-size: 14px;
+                font-weight: bold;
+                color: #2ecc71; /* Nilai Hijau */
+                margin-top: 3px;
+            }
+
+            /* --- BUTTONS --- */
+            .btn {
+                width: 100%;
+                padding: 10px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-bottom: 8px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
             .btn-search { background: #27ae60; }
             .btn-reset { background: #c0392b; }
-            input#searchBox { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
+            .btn-export { background: #2980b9; }
+
+            input#searchBox {
+                width: 100%;
+                padding: 10px;
+                background: #111;
+                border: 1px solid #444;
+                color: #fff;
+                border-radius: 4px;
+                margin-bottom: 10px;
+                box-sizing: border-box;
+            }
+
+            /* Custom Leaflet Controls */
+            .leaflet-control-zoom { border: none !important; }
         </style>
     </head>
     <body>
 
         <header>
             <div class="header-box">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABACAYAAADmmsI8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAD9klEQVR4nO2bS2hcVRSGv3Nn0mSSTGvS2LRpY6vYpA98UKpWsS8E60pciLhS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS8YFioS4UvBRceat0I7hS+YPFvwH4C3v95qPffgAAAABJRU5ErkJggg==" alt="Logo Politeknik">
-                <span class="site-title">casual resident</span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Logo_Politeknik_Malaysia.png" alt="Logo Poli">
+                <span class="site-title">smart resident</span>
             </div>
         </header>
 
@@ -78,17 +170,20 @@
             <div id="map"></div>
 
             <div id="sidebar">
+                <div class="section-header"><i class="fas fa-cog"></i> Tetapan Paparan</div>
+                
                 <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-search"></i> Land Explorer</div>
+                    <div class="section-header"><i class="fas fa-globe"></i> Land Explorer</div>
                     <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
-                    <button class="btn btn-search" onclick="searchLot()">Cari Lot</button>
-                    <button class="btn btn-reset" onclick="location.reload()">Reset Peta</button>
+                    <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
+                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset Peta</button>
+                    <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail + Map (PDF)</button>
                 </div>
 
-                <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Lot Terpilih</div>
+                <div class="sidebar-section" id="data-container">
+                    <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Terperinci</div>
                     <div id="data-display">
-                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik mana-mana lot pada peta untuk melihat maklumat NO PA.</p>
+                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta untuk info.</p>
                     </div>
                 </div>
             </div>
@@ -97,24 +192,51 @@
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
         <script src="js/leaflet-search.js"></script>
         
         <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+            var map = L.map('map', {
+                zoomControl: true, 
+                maxZoom: 28, 
+                minZoom: 1
+            }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
 
+            // Google Satellite (Default)
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-                maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']
+                maxZoom: 20,
+                subdomains:['mt0','mt1','mt2','mt3'],
+                attribution: '© Google Satellite'
             }).addTo(map);
+
+            function highlightFeature(e) {
+                var layer = e.target;
+                layer.setStyle({
+                    weight: 3,
+                    color: '#f1c40f', // Kuning Simply Stay
+                    fillOpacity: 0.6
+                });
+            }
+
+            function resetHighlight(e) {
+                layer_finallot_1.resetStyle(e.target);
+            }
 
             function onEachFeature(feature, layer) {
                 layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight,
                     click: function(e) {
                         var props = feature.properties;
-                        
-                        // Smart Search untuk No PA & Lot
+
+                        // Cari Key PA secara dinamik (sama ada NO_PA, PA, atau PA_LOT)
                         var paKey = Object.keys(props).find(k => k.toUpperCase().includes('PA')) || 'PA';
                         var lotKey = Object.keys(props).find(k => k.toUpperCase().includes('LOT')) || 'NO_LOT';
                         
@@ -132,26 +254,40 @@
                                 <div class="data-value">POLITEKNIK MALAYSIA</div>
                             </div>
                             <div class="data-item">
-                                <div class="data-label">KELUASAN</div>
+                                <div class="data-label">LUAS LOT</div>
                                 <div class="data-value">${props.AREA || props.area || '0'} HA</div>
                             </div>
                         `;
                         document.getElementById('data-display').innerHTML = detailHtml;
-                        layer.bindPopup("Lot: " + props[lotKey] + "<br>PA: " + props[paKey]).openPopup();
+                        
+                        layer.bindPopup("<strong>LOT: " + props[lotKey] + "</strong><br>PA: " + props[paKey]).openPopup();
                         map.flyTo(e.latlng, 19);
                     }
                 });
             }
 
+            map.createPane('pane_finallot_1');
+            map.getPane('pane_finallot_1').style.zIndex = 401;
+
             var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+                pane: 'pane_finallot_1',
                 onEachFeature: onEachFeature,
-                style: { color: '#2ecc71', weight: 2, fillOpacity: 0.4, fillColor: '#2ecc71' }
+                style: {
+                    opacity: 1,
+                    color: '#2ecc71',
+                    weight: 2,
+                    fill: true,
+                    fillOpacity: 0.4,
+                    fillColor: '#2ecc71',
+                    interactive: true
+                }
             }).addTo(map);
 
             function searchLot() {
                 var val = document.getElementById('searchBox').value;
                 layer_finallot_1.eachLayer(function(layer) {
-                    if (layer.feature.properties.NO_LOT == val || layer.feature.properties.LOT == val) {
+                    var lot = layer.feature.properties.NO_LOT || layer.feature.properties.LOT || layer.feature.properties.no_lot;
+                    if (lot == val) {
                         map.flyTo(layer.getBounds().getCenter(), 19);
                         layer.fire('click');
                     }
