@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-        <title>Sistem Maklumat Lot Tanah Politeknik</title>
+        <title>Jalan Jalan Survey - Sistem Maklumat Lot</title>
 
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
@@ -28,16 +28,13 @@
             }
 
             .header-box {
-                background: white; padding: 5px 25px; border-radius: 50px; /* Bentuk bujur lebih moden */
+                background: white; padding: 5px 25px; border-radius: 50px;
                 display: flex; align-items: center; gap: 15px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             }
 
-            /* Gunakan logo_politeknik.png anda */
             .header-box img {
-                height: 45px; /* Saiz lebih besar sedikit supaya jelas */
-                width: auto; 
-                display: block;
+                height: 45px; width: auto; display: block;
                 object-fit: contain;
             }
 
@@ -68,6 +65,18 @@
             .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
             .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; }
 
+            /* --- TOOLTIP STYLE (NAMA PEMILIK DI PETA) --- */
+            .owner-label {
+                background: rgba(0, 0, 0, 0.7);
+                border: 1px solid #2ecc71;
+                color: #fff;
+                font-weight: bold;
+                padding: 2px 5px;
+                font-size: 10px;
+                border-radius: 4px;
+                white-space: nowrap;
+            }
+
             /* --- BUTTONS --- */
             .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 8px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
             .btn-search { background: #27ae60; }
@@ -81,8 +90,8 @@
 
         <header>
             <div class="header-box">
-                <img src="logo_politeknik.png" alt="Logo Politeknik Malaysia">
-                <span class="site-title">Land Info System</span>
+                <img src="logo_politeknik.png" alt="Logo">
+                <span class="site-title">Jalan Jalan Survey</span>
             </div>
         </header>
 
@@ -127,9 +136,17 @@
             }).addTo(map);
 
             function onEachFeature(feature, layer) {
+                var props = feature.properties;
+                
+                // Paparkan nama pemilik terus pada peta menggunakan Tooltip
+                layer.bindTooltip("POLITEKNIK MALAYSIA", {
+                    permanent: true, 
+                    direction: "center",
+                    className: "owner-label"
+                }).openTooltip();
+
                 layer.on({
                     click: function(e) {
-                        var props = feature.properties;
                         var paKey = Object.keys(props).find(k => k.toUpperCase().includes('PA')) || 'PA';
                         var lotKey = Object.keys(props).find(k => k.toUpperCase().includes('LOT')) || 'NO_LOT';
                         
@@ -152,7 +169,7 @@
                             </div>
                         `;
                         document.getElementById('data-display').innerHTML = detailHtml;
-                        layer.bindPopup("Lot: " + props[lotKey] + "<br>PA: " + props[paKey]).openPopup();
+                        layer.bindPopup("Lot: " + props[lotKey] + "<br>Pemilik: POLITEKNIK MALAYSIA").openPopup();
                         map.flyTo(e.latlng, 19);
                     }
                 });
@@ -175,4 +192,3 @@
         </script>
     </body>
 </html>
-
