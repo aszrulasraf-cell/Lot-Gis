@@ -18,130 +18,176 @@
                 height: 100%;
                 padding: 0;
                 margin: 0;
+                overflow: hidden;
+                font-family: 'Segoe UI', Roboto, sans-serif;
+                background-color: #000;
+            }
+
+            /* --- TOP HEADER (Seperti Gambar) --- */
+            header {
+                height: 60px;
+                background-color: #2d5a27; /* Hijau gelap Politeknik */
                 display: flex;
-                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                background-color: #f4f7f6;
-            }
-
-            /* --- SIDEBAR STYLE --- */
-            #sidebar {
-                width: 380px;
-                height: 100vh;
-                background: #ffffff;
-                border-right: 1px solid #d1d8e0;
-                display: flex;
-                flex-direction: column;
-                z-index: 1001;
-                box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-            }
-
-            .sidebar-header {
-                padding: 25px;
-                text-align: center;
-                background: #fff;
-                border-bottom: 2px solid #f1f2f6;
-            }
-
-            .sidebar-header img {
-                width: 160px;
-                height: auto;
-                margin-bottom: 15px;
-            }
-
-            .sidebar-header h2 {
-                font-size: 18px;
-                margin: 0;
-                color: #2f3640;
-                letter-spacing: 1px;
-            }
-
-            .sidebar-content {
-                padding: 20px;
-                flex-grow: 1;
-                overflow-y: auto;
-            }
-
-            /* --- INFO CARD STYLE --- */
-            .info-card {
-                background: #ffffff;
-                border: 1px solid #e1e8ed;
-                border-radius: 12px;
-                padding: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            }
-
-            .info-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .info-table td {
-                padding: 12px 0;
-                border-bottom: 1px solid #f1f2f6;
-            }
-
-            .label {
-                font-size: 11px;
-                font-weight: 700;
-                color: #95a5a6;
-                text-transform: uppercase;
-                display: block;
-            }
-
-            .value {
-                font-size: 15px;
-                font-weight: 600;
-                color: #2c3e50;
-                display: block;
-                margin-top: 4px;
-            }
-
-            /* --- BUTTONS --- */
-            .print-btn {
-                width: 100%;
-                background: #3498db;
+                align-items: center;
+                justify-content: center;
                 color: white;
-                border: none;
-                padding: 12px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                margin-top: 20px;
-                transition: background 0.3s;
+                position: relative;
+                z-index: 1002;
+                border-bottom: 2px solid #1e3d1a;
             }
 
-            .print-btn:hover {
-                background: #2980b9;
+            .logo-header {
+                background: white;
+                padding: 5px 15px;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .logo-header img {
+                height: 30px;
+            }
+
+            .site-title {
+                font-family: 'Brush Script MT', cursive;
+                font-size: 24px;
+                color: #2d5a27;
+            }
+
+            /* --- MAIN LAYOUT --- */
+            #main-container {
+                display: flex;
+                height: calc(100vh - 60px);
+                width: 100%;
             }
 
             #map {
                 flex-grow: 1;
-                height: 100vh;
+                height: 100%;
             }
 
-            /* Tablet/Mobile tweak */
-            @media (max-width: 768px) {
-                #sidebar { width: 250px; }
+            /* --- SIDEBAR DARK STYLE (Seperti Gambar) --- */
+            #sidebar {
+                width: 320px;
+                background: #1a1c23; /* Dark mode background */
+                color: #ecf0f1;
+                padding: 20px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                z-index: 1001;
+                border-left: 1px solid #333;
             }
+
+            .sidebar-section {
+                background: #262936;
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            .section-title {
+                font-size: 14px;
+                font-weight: bold;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #fff;
+            }
+
+            /* --- SEARCH BOX & BUTTONS --- */
+            .search-container input {
+                width: 100%;
+                padding: 10px;
+                background: #12141a;
+                border: 1px solid #444;
+                color: white;
+                border-radius: 4px;
+                margin-bottom: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-bottom: 8px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-search { background: #27ae60; }
+            .btn-reset { background: #c0392b; }
+            .btn-export { background: #2980b9; }
+
+            /* --- INFO DISPLAY --- */
+            .data-item {
+                margin-bottom: 15px;
+            }
+
+            .data-label {
+                font-size: 10px;
+                color: #95a5a6;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .data-value {
+                font-size: 14px;
+                font-weight: bold;
+                color: #2ecc71; /* Hijau terang untuk data */
+                margin-top: 4px;
+            }
+
+            /* Leaflet Overrides */
+            .leaflet-bar { border: none !important; }
         </style>
     </head>
     <body>
 
-        <div id="sidebar">
-            <div class="sidebar-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Logo_Politeknik_Malaysia.png/600px-Logo_Politeknik_Malaysia.png" alt="Logo Politeknik">
-                <h2>SISTEM LOT TANAH</h2>
+        <header>
+            <div class="logo-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Logo_Politeknik_Malaysia.png/600px-Logo_Politeknik_Malaysia.png" alt="Poli">
+                <span class="site-title">smart resident</span>
             </div>
+        </header>
 
-            <div class="sidebar-content" id="sidebar-display">
-                <div style="text-align: center; color: #7f8c8d; margin-top: 50px;">
-                    <i class="fa fa-map-marker-alt fa-3x" style="margin-bottom:15px; color:#bdc3c7;"></i>
-                    <p>Sila klik pada lot tanah di dalam peta untuk melihat perincian No. Lot & No. PA.</p>
+        <div id="main-container">
+            <div id="map"></div>
+
+            <div id="sidebar">
+                <div class="section-title">
+                    <i class="fas fa-cog"></i> Tetapan Paparan
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">
+                        <i class="fas fa-globe"></i> Land Explorer
+                    </div>
+                    
+                    <div class="search-container">
+                        <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
+                        <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
+                        <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync"></i> Reset Peta</button>
+                        <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail + Map (PDF)</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section" id="data-display">
+                    <div class="data-item">
+                        <div class="data-label">Status Pilihan</div>
+                        <div class="data-value" style="color: #e67e22;">Sila Pilih Lot Tanah</div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div id="map"></div>
 
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
@@ -163,103 +209,99 @@
                 minZoom: 1
             }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
 
-            // --- GOOGLE SATELLITE LAYER ---
+            // Google Satellite Default
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
                 maxZoom: 20,
                 subdomains:['mt0','mt1','mt2','mt3'],
                 attribution: '© Google Satellite'
-            }).addTo(map); // addTo(map) menjadikannya lapisan default
+            }).addTo(map);
 
-            var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            });
-
-            // HIGHLIGHT FUNCTIONS
             function highlightFeature(e) {
                 var layer = e.target;
                 layer.setStyle({
-                    weight: 3,
-                    color: '#f1c40f',
-                    fillOpacity: 0.6
+                    weight: 4,
+                    color: '#f1c40f', // Kuning seperti di rujukan Simply Stay
+                    fillOpacity: 0.7
                 });
-                layer.bringToFront();
             }
 
             function resetHighlight(e) {
                 layer_finallot_1.resetStyle(e.target);
             }
 
-            // FUNCTION PAPAR INFO DI SIDEBAR
-            function pop_finallot_1(feature, layer) {
+            function onEachFeature(feature, layer) {
                 layer.on({
                     mouseover: highlightFeature,
                     mouseout: resetHighlight,
                     click: function(e) {
                         var props = feature.properties;
-                        var content = `
-                            <div class="info-card" id="printableArea">
-                                <h3 style="margin-top:0; border-bottom: 2px solid #3498db; padding-bottom:10px;">Butiran Maklumat</h3>
-                                <table class="info-table">
-                                    <tr><td><span class="label">No. Lot</span><span class="value">${props.NO_LOT || 'N/A'}</span></td></tr>
-                                    <tr><td><span class="label">No. PA</span><span class="value">${props.NO_PA || 'N/A'}</span></td></tr>
-                                    <tr><td><span class="label">Keluasan (HA)</span><span class="value">${props.AREA || '0'}</span></td></tr>
-                                    <tr><td><span class="label">Info Tambahan</span><span class="value">${props['tsp — ha'] || '-'}</span></td></tr>
-                                </table>
-                                <button class="print-btn" onclick="window.print()">
-                                    <i class="fa fa-print"></i> Cetak Maklumat
-                                </button>
+                        
+                        // Kemaskini Sidebar dengan detail (Seperti Gambar 1)
+                        var detailHtml = `
+                            <div class="data-item">
+                                <div class="data-label">TOTAL LOT</div>
+                                <div class="data-value">67</div> </div>
+                            <div class="data-item">
+                                <div class="data-label">NO LOT DIPILIH</div>
+                                <div class="data-value">${props.NO_LOT || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NO PA</div>
+                                <div class="data-value">${props.NO_PA || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NAMA PEMILIK</div>
+                                <div class="data-value">POLITEKNIK MALAYSIA</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">LUAS LOT</div>
+                                <div class="data-value">${props.AREA || '0'} HA</div>
                             </div>
                         `;
-                        document.getElementById('sidebar-display').innerHTML = content;
+                        document.getElementById('data-display').innerHTML = detailHtml;
                         
-                        // Zoom ke lot yang diklik
+                        // Popup seperti Gambar 2 (Simply Stay)
+                        var popupContent = `
+                            <div style="font-size:12px; line-height:1.5;">
+                                <strong>LOT FINAL</strong><hr>
+                                No Lot: ${props.NO_LOT}<br>
+                                PA: ${props.NO_PA}<br>
+                                <span style="color:#7f8c8d; font-size:10px;">${props['tsp — ha'] || ''}</span>
+                            </div>
+                        `;
+                        layer.bindPopup(popupContent).openPopup();
                         map.flyTo(e.latlng, 19);
                     }
                 });
             }
 
-            // SETUP LAYER FINALLOT
             map.createPane('pane_finallot_1');
             map.getPane('pane_finallot_1').style.zIndex = 401;
 
             var layer_finallot_1 = new L.geoJson(json_finallot_1, {
                 pane: 'pane_finallot_1',
-                onEachFeature: pop_finallot_1,
+                onEachFeature: onEachFeature,
                 style: {
                     opacity: 1,
-                    color: 'white',
-                    weight: 1.5,
+                    color: '#2ecc71', // Garisan hijau cerah seperti gambar
+                    weight: 2,
                     fill: true,
-                    fillOpacity: 0.3,
-                    fillColor: '#3498db',
+                    fillOpacity: 0.4,
+                    fillColor: '#2ecc71',
                     interactive: true
                 }
-            });
-            map.addLayer(layer_finallot_1);
+            }).addTo(map);
 
-            // KAWALAN LAYER
-            var baseMaps = {
-                "Google Satellite": googleSat,
-                "OpenStreetMap": osm
-            };
-            
-            var overlayMaps = {
-                "Sempadan Lot": layer_finallot_1
-            };
-
-            L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
-
-            // SEARCH (Cari No Lot)
-            map.addControl(new L.Control.Search({
-                layer: layer_finallot_1,
-                initial: false,
-                propertyName: 'NO_LOT',
-                textPlaceholder: 'Cari No Lot...',
-                moveToLocation: function(latlng, title, map) {
-                    map.setView(latlng, 19);
-                }
-            }));
-
+            // Fungsi Search manual untuk butang "Cari Lot"
+            function searchLot() {
+                var val = document.getElementById('searchBox').value;
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == val) {
+                        map.flyTo(layer.getBounds().getCenter(), 19);
+                        layer.fire('click');
+                    }
+                });
+            }
         </script>
     </body>
 </html>
