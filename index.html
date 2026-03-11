@@ -6,58 +6,47 @@
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <title>Sistem Maklumat Lot Tanah Politeknik</title>
 
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/leaflet.css">
-        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <style>
             :root {
-                --primary: #10b981;
-                --primary-dark: #059669;
-                --bg-dark: #0f172a;
-                --sidebar-bg: rgba(15, 23, 42, 0.9);
-                --card-bg: rgba(30, 41, 59, 0.7);
-                --text-main: #f8fafc;
-                --text-muted: #94a3b8;
+                --primary: #2ecc71;
+                --sidebar-dark: #1a1c23;
+                --card-dark: #242731;
             }
 
-            html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); }
-            header { height: 70px; background: linear-gradient(90deg, #064e3b 0%, #065f46 100%); display: flex; align-items: center; padding: 0 30px; z-index: 1002; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-            .header-box { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 8px 25px; border-radius: 50px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255, 255, 255, 0.2); }
-            .header-box img { height: 32px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
-            .site-title { font-size: 20px; font-weight: 700; color: white; letter-spacing: 1px; text-transform: uppercase; }
-            #main-container { display: flex; height: calc(100vh - 70px); width: 100%; }
-            #map { flex-grow: 1; height: 100%; background: #020617; }
+            html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+            header { height: 65px; background-color: #2d5a27; display: flex; align-items: center; justify-content: center; z-index: 1002; position: relative; }
+            .header-box { background: white; padding: 5px 20px; border-radius: 50px; display: flex; align-items: center; gap: 12px; }
+            .header-box img { height: 35px; }
+            .site-title { font-size: 18px; color: #2d5a27; font-weight: 700; text-transform: uppercase; }
 
-            /* --- SIDEBAR --- */
-            #sidebar { width: 360px; background: var(--sidebar-bg); backdrop-filter: blur(15px); padding: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 1001; border-left: 1px solid rgba(255,255,255,0.1); overflow-y: auto; }
-            .sidebar-section { background: var(--card-bg); padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
-            .section-header { font-size: 13px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: var(--primary); text-transform: uppercase; }
-            
-            /* --- DATA DISPLAY --- */
-            .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-            .data-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-            .data-label { font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-            .data-value { font-size: 14px; font-weight: 600; color: #fff; }
-            .full-width { grid-column: span 2; }
-            .highlight { color: var(--primary); font-size: 18px; }
+            #main-container { display: flex; height: calc(100vh - 65px); width: 100%; }
+            #map { flex-grow: 1; height: 100%; background: #111; }
 
-            /* --- GRAPH BAR --- */
-            .chart-container { margin-top: 10px; }
-            .bar-bg { background: #334155; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 5px; }
-            .bar-fill { background: var(--primary); height: 100%; transition: width 1s ease-in-out; }
+            #sidebar { width: 340px; background: var(--sidebar-dark); padding: 15px; display: flex; flex-direction: column; gap: 12px; z-index: 1001; border-left: 1px solid #333; overflow-y: auto; }
+            .sidebar-section { background: var(--card-dark); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+            .section-header { font-size: 11px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; text-transform: uppercase; }
 
-            /* --- LEGEND PADA PETA --- */
-            .info.legend { background: rgba(15, 23, 42, 0.85); padding: 12px; border-radius: 10px; color: white; line-height: 1.6; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
-            .legend i { width: 15px; height: 15px; float: left; margin-right: 10px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); }
+            .data-item { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #333; }
+            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; }
+            .data-value { font-size: 15px; font-weight: bold; color: var(--primary); }
 
-            input#searchBox { width: 100%; padding: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-            .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
-            .btn-search { background: var(--primary); color: white; margin-bottom: 8px; }
-            .btn-reset { background: transparent; border: 1px solid #64748b; color: #94a3b8; flex: 1; }
-            .btn-export { background: #3b82f6; color: white; flex: 1; }
-            .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+            input#searchBox { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; margin-bottom: 10px; }
+            .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+            .btn-search { background: #27ae60; margin-bottom: 8px; }
+            .btn:hover { opacity: 0.8; }
+
+            /* Legend Style */
+            .legend { padding: 12px; background: rgba(26, 28, 35, 0.9); color: white; border-radius: 10px; border: 1px solid #444; line-height: 22px; }
+            .legend i { width: 14px; height: 14px; float: left; margin-right: 8px; border-radius: 2px; margin-top: 4px; }
+
+            /* Chart Container */
+            #chart-wrapper { width: 100%; height: 200px; margin-top: 10px; }
         </style>
     </head>
     <body>
@@ -65,7 +54,7 @@
         <header>
             <div class="header-box">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/logo_politeknik.png" alt="Logo">
-                <span class="site-title">Land<b>Explorer</b> <span style="font-weight: 300; font-size: 14px; opacity: 0.7;">v2.0</span></span>
+                <span class="site-title">Land<b>Analytics</b></span>
             </div>
         </header>
 
@@ -74,21 +63,18 @@
 
             <div id="sidebar">
                 <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-search"></i> Navigasi & Carian</div>
-                    <input type="text" id="searchBox" placeholder="Masukkan No. Lot...">
-                    <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-map-marker-alt"></i> Cari Lokasi</button>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync"></i> Reset</button>
-                        <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Cetak</button>
-                    </div>
+                    <div class="section-header"><i class="fas fa-search"></i> Carian Lot</div>
+                    <input type="text" id="searchBox" placeholder="Contoh: 1023...">
+                    <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
                 </div>
 
                 <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-info-circle"></i> Analisis Data Lot</div>
+                    <div class="section-header"><i class="fas fa-chart-pie"></i> Analisis Keluasan</div>
                     <div id="data-display">
-                        <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px;">
-                            Sila pilih lot pada peta untuk menjana analisis teknikal.
-                        </div>
+                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot untuk analisis.</p>
+                    </div>
+                    <div id="chart-wrapper">
+                        <canvas id="lotChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -98,45 +84,21 @@
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map', { zoomControl: false }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
-            L.control.zoom({ position: 'topright' }).addTo(map);
-
-            var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+            var map = L.map('map', { zoomControl: true }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+            L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
                 maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']
             }).addTo(map);
 
-            // Tambah Legend
+            // Legend
             var legend = L.control({position: 'bottomright'});
             legend.onAdd = function (map) {
-                var div = L.DomUtil.create('div', 'info legend');
-                div.innerHTML = '<b>Kategori Kawasan</b><br>' +
-                                '<i style="background: #10b981"></i> Lot Politeknik<br>' +
-                                '<i style="background: #3b82f6"></i> Kawasan Awam<br>' +
-                                '<i style="background: #f59e0b"></i> Rizab Jalan';
+                var div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = '<b>Petunjuk</b><br>' +
+                                '<i style="background: #2ecc71"></i> Lot Aktif<br>' +
+                                '<i style="background: #3498db"></i> Fasiliti Awam';
                 return div;
             };
             legend.addTo(map);
 
-            function onEachFeature(feature, layer) {
-                layer.on({
-                    click: function(e) {
-                        var props = feature.properties;
-                        var lotNo = props.NO_LOT || props.LOT || 'N/A';
-                        var areaVal = parseFloat(props.AREA || props.area || 0);
-                        
-                        // Simulasi bar peratusan (contoh: 1.0 HA sebagai rujukan penuh)
-                        var barWidth = Math.min((areaVal / 1.0) * 100, 100);
-
-                        var detailHtml = `
-                            <div class="data-grid">
-                                <div class="data-item full-width">
-                                    <div class="data-label">Nombor Lot Utama</div>
-                                    <div class="data-value highlight">${lotNo}</div>
-                                </div>
-                                <div class="data-item">
-                                    <div class="data-label">No. PA</div>
-                                    <div class="data-value" style="color:#fbbf24">${props.PA || 'PA12345'}</div>
-                                </div>
-                                <div class="data-item">
-                                    <div class="data-label">Keluasan</div>
-                                    <div
+            // Inisialisasi Chart
+            var ctx = document.getElementById('lotChart').getContext('2d
