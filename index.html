@@ -1,194 +1,353 @@
 <!doctype html>
+
 <html lang="en">
+
     <head>
+
         <meta charset="utf-8">
+
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-        <title>Jalan Jalan Survey - Sistem Maklumat Lot</title>
+
+        <title>Sistem Maklumat Lot Tanah Politeknik</title>
+
+
 
         <link rel="stylesheet" href="css/leaflet.css">
+
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+
         <link rel="stylesheet" href="css/qgis2web.css">
+
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
+
         <link rel="stylesheet" href="css/leaflet-search.css">
 
+
+
         <style>
+
             html, body {
+
                 width: 100%; height: 100%; padding: 0; margin: 0;
+
                 overflow: hidden; font-family: 'Segoe UI', Roboto, sans-serif;
+
                 background-color: #000;
+
             }
+
+
 
             /* --- HEADER HIJAU --- */
+
             header {
+
                 height: 70px; background-color: #2d5a27;
+
                 display: flex; align-items: center; justify-content: center;
+
                 z-index: 1002; position: relative;
+
                 box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
             }
+
+
 
             .header-box {
-                background: white; padding: 5px 25px; border-radius: 50px;
+
+                background: white; padding: 5px 25px; border-radius: 50px; /* Bentuk bujur lebih moden */
+
                 display: flex; align-items: center; gap: 15px;
+
                 box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
             }
+
+
+
+            /* Gunakan logo_politeknik.png anda */
 
             .header-box img {
-                height: 45px; width: auto; display: block;
+
+                height: 45px; /* Saiz lebih besar sedikit supaya jelas */
+
+                width: auto; 
+
+                display: block;
+
                 object-fit: contain;
+
             }
+
+
 
             .site-title {
+
                 font-family: 'Trebuchet MS', sans-serif;
+
                 font-size: 22px; color: #2d5a27; 
+
                 font-weight: bold;
+
                 text-transform: uppercase;
+
                 letter-spacing: 1px;
+
             }
+
+
 
             /* --- LAYOUT UTAMA --- */
+
             #main-container { display: flex; height: calc(100vh - 70px); width: 100%; }
+
             #map { flex-grow: 1; height: 100%; background: #111; }
 
+
+
             /* --- SIDEBAR DARK MODE --- */
+
             #sidebar {
+
                 width: 320px; background: #1a1c23; color: #ffffff;
+
                 padding: 15px; display: flex; flex-direction: column; gap: 12px;
+
                 z-index: 1001; border-left: 1px solid #333; overflow-y: auto;
+
             }
+
+
 
             .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; }
+
             .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; }
 
+
+
             /* --- DATA DISPLAY --- */
+
             .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+
             .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+
             .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; }
 
-            /* --- TOOLTIP STYLE (NAMA PEMILIK DI PETA) --- */
-            .owner-label {
-                background: rgba(0, 0, 0, 0.7);
-                border: 1px solid #2ecc71;
-                color: #fff;
-                font-weight: bold;
-                padding: 2px 5px;
-                font-size: 10px;
-                border-radius: 4px;
-                white-space: nowrap;
-            }
+
 
             /* --- BUTTONS --- */
+
             .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 8px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
             .btn-search { background: #27ae60; }
+
             .btn-reset { background: #c0392b; }
+
             .btn-export { background: #2980b9; }
 
+
+
             input#searchBox { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
+
         </style>
+
     </head>
+
     <body>
 
+
+
         <header>
+
             <div class="header-box">
-                <img src="logo_politeknik.png" alt="Logo">
-                <span class="site-title">Jalan Jalan Survey</span>
+
+                <img src="logo_politeknik.png" alt="Logo Politeknik Malaysia">
+
+                <span class="site-title">Land Info System</span>
+
             </div>
+
         </header>
 
+
+
         <div id="main-container">
+
             <div id="map"></div>
 
+
+
             <div id="sidebar">
+
                 <div class="section-header"><i class="fas fa-cog"></i> Tetapan Paparan</div>
+
                 
+
                 <div class="sidebar-section">
+
                     <div class="section-header"><i class="fas fa-globe"></i> Land Explorer</div>
+
                     <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
+
                     <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
+
                     <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset Peta</button>
+
                     <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail + Map (PDF)</button>
+
                 </div>
+
+
 
                 <div class="sidebar-section" id="data-container">
+
                     <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Terperinci</div>
+
                     <div id="data-display">
+
                         <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta untuk info.</p>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
+
         <script src="js/qgis2web_expressions.js"></script>
+
         <script src="js/leaflet.js"></script>
+
         <script src="js/L.Control.Layers.Tree.min.js"></script>
+
         <script src="js/leaflet-search.js"></script>
+
         
+
         <script src="data/bklmerge_0.js"></script>
+
         <script src="data/finallot_1.js"></script>
 
+
+
         <script>
+
             var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
 
+
+
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+
                 maxZoom: 20, 
+
                 subdomains:['mt0','mt1','mt2','mt3'],
+
                 attribution: 'Google Satellite'
+
             }).addTo(map);
+
+
 
             function onEachFeature(feature, layer) {
-                var props = feature.properties;
-                
-                // Paparkan nama pemilik terus pada peta menggunakan Tooltip
-                layer.bindTooltip("POLITEKNIK MALAYSIA", {
-                    permanent: true, 
-                    direction: "center",
-                    className: "owner-label"
-                }).openTooltip();
 
                 layer.on({
+
                     click: function(e) {
+
+                        var props = feature.properties;
+
                         var paKey = Object.keys(props).find(k => k.toUpperCase().includes('PA')) || 'PA';
+
                         var lotKey = Object.keys(props).find(k => k.toUpperCase().includes('LOT')) || 'NO_LOT';
+
                         
+
                         var detailHtml = `
+
                             <div class="data-item">
+
                                 <div class="data-label">NO LOT DIPILIH</div>
+
                                 <div class="data-value">${props[lotKey] || 'N/A'}</div>
+
                             </div>
+
                             <div class="data-item">
+
                                 <div class="data-label">NO PA</div>
+
                                 <div class="data-value" style="color:#f1c40f;">${props[paKey] || 'N/A'}</div>
+
                             </div>
+
                             <div class="data-item">
+
                                 <div class="data-label">NAMA PEMILIK</div>
+
                                 <div class="data-value">POLITEKNIK MALAYSIA</div>
+
                             </div>
+
                             <div class="data-item">
+
                                 <div class="data-label">LUAS LOT</div>
+
                                 <div class="data-value">${props.AREA || props.area || '0'} HA</div>
+
                             </div>
+
                         `;
+
                         document.getElementById('data-display').innerHTML = detailHtml;
-                        layer.bindPopup("Lot: " + props[lotKey] + "<br>Pemilik: POLITEKNIK MALAYSIA").openPopup();
+
+                        layer.bindPopup("Lot: " + props[lotKey] + "<br>PA: " + props[paKey]).openPopup();
+
                         map.flyTo(e.latlng, 19);
+
                     }
+
                 });
+
             }
+
+
 
             var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+
                 onEachFeature: onEachFeature,
+
                 style: { color: '#2ecc71', weight: 2, fillOpacity: 0.4, fillColor: '#2ecc71' }
+
             }).addTo(map);
 
+
+
             function searchLot() {
+
                 var val = document.getElementById('searchBox').value;
+
                 layer_finallot_1.eachLayer(function(layer) {
+
                     if (layer.feature.properties.NO_LOT == val || layer.feature.properties.LOT == val) {
+
                         map.flyTo(layer.getBounds().getCenter(), 19);
+
                         layer.fire('click');
+
                     }
+
                 });
+
             }
+
         </script>
+
     </body>
+
 </html>
