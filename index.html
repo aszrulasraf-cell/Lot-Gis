@@ -128,3 +128,47 @@
                     click: function(e) {
                         var props = feature.properties;
                         var paKey = Object.keys(props).find(k => k.toUpperCase().includes('PA')) || 'PA';
+                        var lotKey = Object.keys(props).find(k => k.toUpperCase().includes('LOT')) || 'NO_LOT';
+                        
+                        var detailHtml = `
+                            <div class="data-item">
+                                <div class="data-label">NO LOT DIPILIH</div>
+                                <div class="data-value">${props[lotKey] || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NO PA</div>
+                                <div class="data-value" style="color:#f1c40f;">${props[paKey] || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NAMA PEMILIK</div>
+                                <div class="data-value">POLITEKNIK UNGKU OMAR</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">LUAS LOT</div>
+                                <div class="data-value">${props.AREA || props.area || '0'} HA</div>
+                            </div>
+                        `;
+                        document.getElementById('data-display').innerHTML = detailHtml;
+                        layer.bindPopup("Lot: " + props[lotKey] + "<br>PA: " + props[paKey]).openPopup();
+                        map.flyTo(e.latlng, 19);
+                    }
+                });
+            }
+
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+                onEachFeature: onEachFeature,
+                style: { color: '#2ecc71', weight: 2, fillOpacity: 0.4, fillColor: '#2ecc71' }
+            }).addTo(map);
+
+            function searchLot() {
+                var val = document.getElementById('searchBox').value;
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == val || layer.feature.properties.LOT == val) {
+                        map.flyTo(layer.getBounds().getCenter(), 19);
+                        layer.fire('click');
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
