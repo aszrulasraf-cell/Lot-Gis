@@ -19,117 +19,91 @@
                 padding: 0;
                 margin: 0;
                 overflow: hidden;
-                font-family: 'Segoe UI', Roboto, sans-serif;
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                 background-color: #000;
             }
 
-            /* --- TOP HEADER (Seperti Gambar) --- */
+            /* --- HEADER HIJAU POLITEKNIK --- */
             header {
-                height: 60px;
-                background-color: #2d5a27; /* Hijau gelap Politeknik */
+                height: 70px;
+                background-color: #2d5a27; /* Warna Hijau Politeknik */
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: white;
-                position: relative;
                 z-index: 1002;
-                border-bottom: 2px solid #1e3d1a;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             }
 
-            .logo-header {
+            .logo-container {
                 background: white;
-                padding: 5px 15px;
-                border-radius: 4px;
+                padding: 5px 20px;
+                border-radius: 5px;
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 15px;
             }
 
-            .logo-header img {
-                height: 30px;
+            .logo-container img {
+                height: 40px; /* Saiz logo lebih besar */
+                width: auto;
             }
 
             .site-title {
                 font-family: 'Brush Script MT', cursive;
-                font-size: 24px;
+                font-size: 28px;
                 color: #2d5a27;
+                font-weight: normal;
             }
 
-            /* --- MAIN LAYOUT --- */
+            /* --- LAYOUT UTAMA --- */
             #main-container {
                 display: flex;
-                height: calc(100vh - 60px);
+                height: calc(100vh - 70px);
                 width: 100%;
             }
 
             #map {
                 flex-grow: 1;
                 height: 100%;
+                background: #222;
             }
 
-            /* --- SIDEBAR DARK STYLE (Seperti Gambar) --- */
+            /* --- SIDEBAR DARK MODE (KANAN) --- */
             #sidebar {
-                width: 320px;
-                background: #1a1c23; /* Dark mode background */
+                width: 350px;
+                background: #1a1c23;
                 color: #ecf0f1;
                 padding: 20px;
-                box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
                 gap: 15px;
                 z-index: 1001;
                 border-left: 1px solid #333;
+                overflow-y: auto;
             }
 
             .sidebar-section {
                 background: #262936;
                 padding: 15px;
-                border-radius: 8px;
+                border-radius: 10px;
+                border: 1px solid #3d4251;
             }
 
             .section-title {
                 font-size: 14px;
                 font-weight: bold;
                 margin-bottom: 12px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
                 color: #fff;
-            }
-
-            /* --- SEARCH BOX & BUTTONS --- */
-            .search-container input {
-                width: 100%;
-                padding: 10px;
-                background: #12141a;
-                border: 1px solid #444;
-                color: white;
-                border-radius: 4px;
-                margin-bottom: 10px;
-            }
-
-            .btn {
-                width: 100%;
-                padding: 10px;
-                border: none;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-                margin-bottom: 8px;
-                color: white;
                 display: flex;
                 align-items: center;
-                justify-content: center;
                 gap: 8px;
+                border-bottom: 1px solid #3d4251;
+                padding-bottom: 8px;
             }
 
-            .btn-search { background: #27ae60; }
-            .btn-reset { background: #c0392b; }
-            .btn-export { background: #2980b9; }
-
-            /* --- INFO DISPLAY --- */
+            /* --- DATA DISPLAY --- */
             .data-item {
-                margin-bottom: 15px;
+                margin-bottom: 18px;
             }
 
             .data-label {
@@ -137,24 +111,55 @@
                 color: #95a5a6;
                 text-transform: uppercase;
                 letter-spacing: 1px;
+                font-weight: bold;
             }
 
             .data-value {
-                font-size: 14px;
+                font-size: 16px;
                 font-weight: bold;
-                color: #2ecc71; /* Hijau terang untuk data */
-                margin-top: 4px;
+                color: #2ecc71; /* Warna hijau data */
+                margin-top: 5px;
             }
 
-            /* Leaflet Overrides */
-            .leaflet-bar { border: none !important; }
+            /* --- BUTTONS --- */
+            .btn {
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                transition: 0.3s;
+            }
+
+            .btn-search { background: #27ae60; }
+            .btn-reset { background: #c0392b; }
+            .btn-export { background: #2980b9; }
+            .btn:hover { opacity: 0.8; }
+
+            input#searchBox {
+                width: 100%;
+                padding: 12px;
+                background: #000;
+                border: 1px solid #444;
+                color: #fff;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                box-sizing: border-box;
+            }
         </style>
     </head>
     <body>
 
         <header>
-            <div class="logo-header">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Logo_Politeknik_Malaysia.png/600px-Logo_Politeknik_Malaysia.png" alt="Poli">
+            <div class="logo-container">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Logo_Politeknik_Malaysia.png" alt="Logo Politeknik">
                 <span class="site-title">smart resident</span>
             </div>
         </header>
@@ -163,27 +168,18 @@
             <div id="map"></div>
 
             <div id="sidebar">
-                <div class="section-title">
-                    <i class="fas fa-cog"></i> Tetapan Paparan
+                <div class="sidebar-section">
+                    <div class="section-title"><i class="fas fa-search"></i> Land Explorer</div>
+                    <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
+                    <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-location-arrow"></i> Cari Lot</button>
+                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync"></i> Reset Peta</button>
+                    <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail (PDF)</button>
                 </div>
 
                 <div class="sidebar-section">
-                    <div class="section-title">
-                        <i class="fas fa-globe"></i> Land Explorer
-                    </div>
-                    
-                    <div class="search-container">
-                        <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
-                        <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
-                        <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync"></i> Reset Peta</button>
-                        <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail + Map (PDF)</button>
-                    </div>
-                </div>
-
-                <div class="sidebar-section" id="data-display">
-                    <div class="data-item">
-                        <div class="data-label">Status Pilihan</div>
-                        <div class="data-value" style="color: #e67e22;">Sila Pilih Lot Tanah</div>
+                    <div class="section-title"><i class="fas fa-info-circle"></i> Maklumat Lot Tanah</div>
+                    <div id="data-display">
+                        <p style="color:#7f8c8d; text-align:center;">Sila klik pada lot tanah untuk paparan data.</p>
                     </div>
                 </div>
             </div>
@@ -209,7 +205,7 @@
                 minZoom: 1
             }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
 
-            // Google Satellite Default
+            // GOOGLE SATELLITE
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
                 maxZoom: 20,
                 subdomains:['mt0','mt1','mt2','mt3'],
@@ -220,7 +216,7 @@
                 var layer = e.target;
                 layer.setStyle({
                     weight: 4,
-                    color: '#f1c40f', // Kuning seperti di rujukan Simply Stay
+                    color: '#f1c40f', // Highlight Kuning seperti Simply Stay
                     fillOpacity: 0.7
                 });
             }
@@ -235,19 +231,25 @@
                     mouseout: resetHighlight,
                     click: function(e) {
                         var props = feature.properties;
+
+                        // --- AUTO-DETECT NO PA & NO LOT ---
+                        // Mencari mana-mana kolum yang ada nama 'PA' atau 'LOT'
+                        var paKey = Object.keys(props).find(key => key.toUpperCase().includes('PA')) || 'NO_PA';
+                        var lotKey = Object.keys(props).find(key => key.toUpperCase().includes('LOT')) || 'NO_LOT';
                         
-                        // Kemaskini Sidebar dengan detail (Seperti Gambar 1)
+                        var valPA = props[paKey] || 'Tiada Data';
+                        var valLot = props[lotKey] || 'Tiada Data';
+                        var valArea = props.AREA || props.area || props.LUAS || '0';
+
+                        // Kemaskini Sidebar
                         var detailHtml = `
                             <div class="data-item">
-                                <div class="data-label">TOTAL LOT</div>
-                                <div class="data-value">67</div> </div>
-                            <div class="data-item">
                                 <div class="data-label">NO LOT DIPILIH</div>
-                                <div class="data-value">${props.NO_LOT || 'N/A'}</div>
+                                <div class="data-value">${valLot}</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-label">NO PA</div>
-                                <div class="data-value">${props.NO_PA || 'N/A'}</div>
+                                <div class="data-value" style="color:#f1c40f;">${valPA}</div>
                             </div>
                             <div class="data-item">
                                 <div class="data-label">NAMA PEMILIK</div>
@@ -255,21 +257,13 @@
                             </div>
                             <div class="data-item">
                                 <div class="data-label">LUAS LOT</div>
-                                <div class="data-value">${props.AREA || '0'} HA</div>
+                                <div class="data-value">${valArea} HA</div>
                             </div>
                         `;
                         document.getElementById('data-display').innerHTML = detailHtml;
                         
-                        // Popup seperti Gambar 2 (Simply Stay)
-                        var popupContent = `
-                            <div style="font-size:12px; line-height:1.5;">
-                                <strong>LOT FINAL</strong><hr>
-                                No Lot: ${props.NO_LOT}<br>
-                                PA: ${props.NO_PA}<br>
-                                <span style="color:#7f8c8d; font-size:10px;">${props['tsp — ha'] || ''}</span>
-                            </div>
-                        `;
-                        layer.bindPopup(popupContent).openPopup();
+                        // Popup ala Simply Stay
+                        layer.bindPopup("<strong>LOT FINAL</strong><hr>No Lot: " + valLot + "<br>PA: " + valPA).openPopup();
                         map.flyTo(e.latlng, 19);
                     }
                 });
@@ -283,7 +277,7 @@
                 onEachFeature: onEachFeature,
                 style: {
                     opacity: 1,
-                    color: '#2ecc71', // Garisan hijau cerah seperti gambar
+                    color: '#2ecc71', // Garisan Hijau
                     weight: 2,
                     fill: true,
                     fillOpacity: 0.4,
@@ -292,15 +286,19 @@
                 }
             }).addTo(map);
 
-            // Fungsi Search manual untuk butang "Cari Lot"
             function searchLot() {
                 var val = document.getElementById('searchBox').value;
+                var found = false;
                 layer_finallot_1.eachLayer(function(layer) {
-                    if (layer.feature.properties.NO_LOT == val) {
+                    // Cari dalam semua properties NO_LOT (case insensitive)
+                    var lotProp = layer.feature.properties.NO_LOT || layer.feature.properties.no_lot || layer.feature.properties.LOT;
+                    if (lotProp == val) {
                         map.flyTo(layer.getBounds().getCenter(), 19);
                         layer.fire('click');
+                        found = true;
                     }
                 });
+                if(!found) alert("No Lot tidak dijumpai!");
             }
         </script>
     </body>
