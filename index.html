@@ -6,55 +6,79 @@
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
         <title>Sistem Maklumat Lot Tanah Politeknik</title>
 
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="css/leaflet-search.css">
 
         <style>
-            :root {
-                --primary: #2ecc71;
-                --sidebar-dark: #1a1c23;
-                --card-dark: #242731;
+            html, body {
+                width: 100%; height: 100%; padding: 0; margin: 0;
+                overflow: hidden; font-family: 'Segoe UI', Roboto, sans-serif;
+                background-color: #000;
             }
 
-            html, body { width: 100%; height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
-            header { height: 65px; background-color: #2d5a27; display: flex; align-items: center; justify-content: center; z-index: 1002; position: relative; }
-            .header-box { background: white; padding: 5px 20px; border-radius: 50px; display: flex; align-items: center; gap: 12px; }
-            .header-box img { height: 35px; }
-            .site-title { font-size: 18px; color: #2d5a27; font-weight: 700; text-transform: uppercase; }
+            /* --- HEADER HIJAU --- */
+            header {
+                height: 65px; background-color: #2d5a27;
+                display: flex; align-items: center; justify-content: center;
+                z-index: 1002; position: relative;
+            }
 
+            .header-box {
+                background: white; padding: 5px 20px; border-radius: 4px;
+                display: flex; align-items: center; gap: 12px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+
+            /* Logo dilaraskan agar muat dan jelas */
+            .header-box img {
+                height: 35px; width: auto; display: block;
+            }
+
+            .site-title {
+                font-family: 'Brush Script MT', cursive;
+                font-size: 26px; color: #2d5a27; line-height: 1;
+                font-style: italic;
+            }
+
+            /* --- LAYOUT UTAMA --- */
             #main-container { display: flex; height: calc(100vh - 65px); width: 100%; }
             #map { flex-grow: 1; height: 100%; background: #111; }
 
-            #sidebar { width: 340px; background: var(--sidebar-dark); padding: 15px; display: flex; flex-direction: column; gap: 12px; z-index: 1001; border-left: 1px solid #333; overflow-y: auto; }
-            .sidebar-section { background: var(--card-dark); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-            .section-header { font-size: 11px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; text-transform: uppercase; }
+            /* --- SIDEBAR DARK MODE --- */
+            #sidebar {
+                width: 320px; background: #1a1c23; color: #ffffff;
+                padding: 15px; display: flex; flex-direction: column; gap: 12px;
+                z-index: 1001; border-left: 1px solid #333; overflow-y: auto;
+            }
 
-            .data-item { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #333; }
-            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; }
-            .data-value { font-size: 15px; font-weight: bold; color: var(--primary); }
+            .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; }
+            .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; }
 
-            input#searchBox { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; margin-bottom: 10px; }
-            .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-            .btn-search { background: #27ae60; margin-bottom: 8px; }
-            .btn:hover { opacity: 0.8; }
+            /* --- DATA DISPLAY --- */
+            .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+            .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; }
 
-            /* Legend Style */
-            .legend { padding: 12px; background: rgba(26, 28, 35, 0.9); color: white; border-radius: 10px; border: 1px solid #444; line-height: 22px; }
-            .legend i { width: 14px; height: 14px; float: left; margin-right: 8px; border-radius: 2px; margin-top: 4px; }
+            /* --- BUTTONS --- */
+            .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 8px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+            .btn-search { background: #27ae60; }
+            .btn-reset { background: #c0392b; }
+            .btn-export { background: #2980b9; }
 
-            /* Chart Container */
-            #chart-wrapper { width: 100%; height: 200px; margin-top: 10px; }
+            input#searchBox { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
         </style>
     </head>
     <body>
 
         <header>
             <div class="header-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/logo_politeknik.png" alt="Logo">
-                <span class="site-title">Land<b>Analytics</b></span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/logo_politeknik.png" 
+                     onerror="this.src='https://seeklogo.com/images/P/politeknik-malaysia-logo-92E83E4C9F-seeklogo.com.png'" 
+                     alt="Logo Politeknik">
+                <span class="site-title">casual resident</span>
             </div>
         </header>
 
@@ -62,43 +86,88 @@
             <div id="map"></div>
 
             <div id="sidebar">
+                <div class="section-header"><i class="fas fa-cog"></i> Tetapan Paparan</div>
+                
                 <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-search"></i> Carian Lot</div>
-                    <input type="text" id="searchBox" placeholder="Contoh: 1023...">
+                    <div class="section-header"><i class="fas fa-globe"></i> Land Explorer</div>
+                    <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
                     <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
+                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset Peta</button>
+                    <button class="btn btn-export" onclick="window.print()"><i class="fas fa-file-pdf"></i> Export Detail + Map (PDF)</button>
                 </div>
 
-                <div class="sidebar-section">
-                    <div class="section-header"><i class="fas fa-chart-pie"></i> Analisis Keluasan</div>
+                <div class="sidebar-section" id="data-container">
+                    <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Terperinci</div>
                     <div id="data-display">
-                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot untuk analisis.</p>
-                    </div>
-                    <div id="chart-wrapper">
-                        <canvas id="lotChart"></canvas>
+                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta untuk info.</p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        
+        <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map', { zoomControl: true }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
-            L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-                maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']
+            var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+
+            var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20, 
+                subdomains:['mt0','mt1','mt2','mt3'],
+                attribution: 'Google Satellite'
             }).addTo(map);
 
-            // Legend
-            var legend = L.control({position: 'bottomright'});
-            legend.onAdd = function (map) {
-                var div = L.DomUtil.create('div', 'legend');
-                div.innerHTML = '<b>Petunjuk</b><br>' +
-                                '<i style="background: #2ecc71"></i> Lot Aktif<br>' +
-                                '<i style="background: #3498db"></i> Fasiliti Awam';
-                return div;
-            };
-            legend.addTo(map);
+            function onEachFeature(feature, layer) {
+                layer.on({
+                    click: function(e) {
+                        var props = feature.properties;
+                        var paKey = Object.keys(props).find(k => k.toUpperCase().includes('PA')) || 'PA';
+                        var lotKey = Object.keys(props).find(k => k.toUpperCase().includes('LOT')) || 'NO_LOT';
+                        
+                        var detailHtml = `
+                            <div class="data-item">
+                                <div class="data-label">NO LOT DIPILIH</div>
+                                <div class="data-value">${props[lotKey] || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NO PA</div>
+                                <div class="data-value" style="color:#f1c40f;">${props[paKey] || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">NAMA PEMILIK</div>
+                                <div class="div-value">POLITEKNIK MALAYSIA</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">LUAS LOT</div>
+                                <div class="data-value">${props.AREA || props.area || '0'} HA</div>
+                            </div>
+                        `;
+                        document.getElementById('data-display').innerHTML = detailHtml;
+                        layer.bindPopup("Lot: " + props[lotKey] + "<br>PA: " + props[paKey]).openPopup();
+                        map.flyTo(e.latlng, 19);
+                    }
+                });
+            }
 
-            // Inisialisasi Chart
-            var ctx = document.getElementById('lotChart').getContext('2d
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+                onEachFeature: onEachFeature,
+                style: { color: '#2ecc71', weight: 2, fillOpacity: 0.4, fillColor: '#2ecc71' }
+            }).addTo(map);
+
+            function searchLot() {
+                var val = document.getElementById('searchBox').value;
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == val || layer.feature.properties.LOT == val) {
+                        map.flyTo(layer.getBounds().getCenter(), 19);
+                        layer.fire('click');
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
