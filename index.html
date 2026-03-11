@@ -4,239 +4,261 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+        <title>Sistem Maklumat Lot Tanah Politeknik</title>
+
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet-search.css">
-        <link rel="stylesheet" href="css/leaflet.photon.css">
+
         <style>
-            html, body, #map {
+            html, body {
                 width: 100%;
                 height: 100%;
                 padding: 0;
                 margin: 0;
-                background: #f8f9fa;
+                display: flex;
                 font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background-color: #f4f7f6;
             }
 
-            /* Cantikkan Tooltip & Popup */
-            .leaflet-popup-content-wrapper {
-                border-radius: 8px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                padding: 2px;
+            /* --- SIDEBAR STYLE --- */
+            #sidebar {
+                width: 380px;
+                height: 100vh;
+                background: #ffffff;
+                border-right: 1px solid #d1d8e0;
+                display: flex;
+                flex-direction: column;
+                z-index: 1001;
+                box-shadow: 4px 0 10px rgba(0,0,0,0.05);
             }
-            
-            .leaflet-popup-content table {
+
+            .sidebar-header {
+                padding: 25px;
+                text-align: center;
+                background: #fff;
+                border-bottom: 2px solid #f1f2f6;
+            }
+
+            .sidebar-header img {
+                width: 160px;
+                height: auto;
+                margin-bottom: 15px;
+            }
+
+            .sidebar-header h2 {
+                font-size: 18px;
+                margin: 0;
+                color: #2f3640;
+                letter-spacing: 1px;
+            }
+
+            .sidebar-content {
+                padding: 20px;
+                flex-grow: 1;
+                overflow-y: auto;
+            }
+
+            /* --- INFO CARD STYLE --- */
+            .info-card {
+                background: #ffffff;
+                border: 1px solid #e1e8ed;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+
+            .info-table {
                 width: 100%;
                 border-collapse: collapse;
-                margin: 5px 0;
             }
 
-            .leaflet-popup-content td {
-                padding: 6px 10px;
-                border-bottom: 1px solid #eee;
-                font-size: 13px;
-                color: #333;
+            .info-table td {
+                padding: 12px 0;
+                border-bottom: 1px solid #f1f2f6;
             }
 
-            .leaflet-popup-content b, 
-            .leaflet-popup-content strong {
-                color: #2c3e50;
+            .label {
                 font-size: 11px;
+                font-weight: 700;
+                color: #95a5a6;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
+                display: block;
             }
 
-            /* Custom Search Button */
-            .leaflet-control-search .search-button {
-                background-color: #fff !important;
-                border: 2px solid rgba(0,0,0,0.2) !important;
-                border-radius: 4px !important;
+            .value {
+                font-size: 15px;
+                font-weight: 600;
+                color: #2c3e50;
+                display: block;
+                margin-top: 4px;
             }
 
-            /* Layer Control Design */
-            .leaflet-control-layers {
-                border-radius: 8px !important;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            /* --- BUTTONS --- */
+            .print-btn {
+                width: 100%;
+                background: #3498db;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                margin-top: 20px;
+                transition: background 0.3s;
+            }
+
+            .print-btn:hover {
+                background: #2980b9;
+            }
+
+            #map {
+                flex-grow: 1;
+                height: 100vh;
+            }
+
+            /* Tablet/Mobile tweak */
+            @media (max-width: 768px) {
+                #sidebar { width: 250px; }
             }
         </style>
-        <title>Sistem Maklumat Lot Tanah</title>
     </head>
     <body>
+
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Logo_Politeknik_Malaysia.png/600px-Logo_Politeknik_Malaysia.png" alt="Logo Politeknik">
+                <h2>SISTEM LOT TANAH</h2>
+            </div>
+
+            <div class="sidebar-content" id="sidebar-display">
+                <div style="text-align: center; color: #7f8c8d; margin-top: 50px;">
+                    <i class="fa fa-map-marker-alt fa-3x" style="margin-bottom:15px; color:#bdc3c7;"></i>
+                    <p>Sila klik pada lot tanah di dalam peta untuk melihat perincian No. Lot & No. PA.</p>
+                </div>
+            </div>
+        </div>
+
         <div id="map"></div>
 
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
-        <script src="js/leaflet.rotatedMarker.js"></script>
-        <script src="js/leaflet.pattern.js"></script>
         <script src="js/leaflet-hash.js"></script>
         <script src="js/Autolinker.min.js"></script>
         <script src="js/rbush.min.js"></script>
         <script src="js/labelgun.min.js"></script>
         <script src="js/labels.js"></script>
-        <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-search.js"></script>
+        
         <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-        var map = L.map('map', {
-            zoomControl: true, 
-            maxZoom: 28, 
-            minZoom: 1
-        }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
+            var map = L.map('map', {
+                zoomControl: true, 
+                maxZoom: 28, 
+                minZoom: 1
+            }).fitBounds([[2.1025299883076296,102.52069200782941],[2.104789313408464,102.52465447473166]]);
 
-        var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('Kemaskini 2026');
+            // --- GOOGLE SATELLITE LAYER ---
+            var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains:['mt0','mt1','mt2','mt3'],
+                attribution: '© Google Satellite'
+            }).addTo(map); // addTo(map) menjadikannya lapisan default
 
-        // --- LAYER BASEMAP (TAMBAHAN) ---
-        var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3'],
-            attribution: '© Google Satellite'
-        }).addTo(map);
-
-        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        });
-
-        // --- FUNGSI HIGHLIGHT ---
-        function highlightFeature(e) {
-            var layer = e.target;
-            layer.setStyle({
-                weight: 3,
-                color: '#f1c40f',
-                fillOpacity: 0.7
+            var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
             });
-            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+
+            // HIGHLIGHT FUNCTIONS
+            function highlightFeature(e) {
+                var layer = e.target;
+                layer.setStyle({
+                    weight: 3,
+                    color: '#f1c40f',
+                    fillOpacity: 0.6
+                });
                 layer.bringToFront();
             }
-        }
 
-        function resetHighlight(e) {
-            layer_finallot_1.resetStyle(e.target);
-        }
-
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-
-        function removeEmptyRowsFromPopupContent(content, feature) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var rows = tempDiv.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var td = rows[i].querySelector('td.visible-with-data');
-                var key = td ? td.id : '';
-                if (td && feature.properties[key] == null) {
-                    rows[i].parentNode.removeChild(rows[i]);
-                }
+            function resetHighlight(e) {
+                layer_finallot_1.resetStyle(e.target);
             }
-            return tempDiv.innerHTML;
-        }
 
-        // --- LAYER 0: BKLMERGE (POINTS) ---
-        function pop_bklmerge_0(feature, layer) {
-            var popupContent = '<table>\
-                    <tr><td colspan="2"><b>Fid:</b><br>' + (feature.properties['fid'] || '-') + '</td></tr>\
-                    <tr><td colspan="2"><b>U:</b><br>' + (feature.properties['U'] || '-') + '</td></tr>\
-                    <tr><td colspan="2"><b>B:</b><br>' + (feature.properties['B'] || '-') + '</td></tr>\
-                </table>';
-            layer.bindPopup(popupContent, {maxHeight: 400});
-        }
-
-        function style_bklmerge_0_0() {
-            return {
-                radius: 5.0,
-                opacity: 1,
-                color: 'white',
-                weight: 2,
-                fill: true,
-                fillOpacity: 1,
-                fillColor: '#e74c3c', // Warna merah cerah
-                interactive: true,
+            // FUNCTION PAPAR INFO DI SIDEBAR
+            function pop_finallot_1(feature, layer) {
+                layer.on({
+                    mouseover: highlightFeature,
+                    mouseout: resetHighlight,
+                    click: function(e) {
+                        var props = feature.properties;
+                        var content = `
+                            <div class="info-card" id="printableArea">
+                                <h3 style="margin-top:0; border-bottom: 2px solid #3498db; padding-bottom:10px;">Butiran Maklumat</h3>
+                                <table class="info-table">
+                                    <tr><td><span class="label">No. Lot</span><span class="value">${props.NO_LOT || 'N/A'}</span></td></tr>
+                                    <tr><td><span class="label">No. PA</span><span class="value">${props.NO_PA || 'N/A'}</span></td></tr>
+                                    <tr><td><span class="label">Keluasan (HA)</span><span class="value">${props.AREA || '0'}</span></td></tr>
+                                    <tr><td><span class="label">Info Tambahan</span><span class="value">${props['tsp — ha'] || '-'}</span></td></tr>
+                                </table>
+                                <button class="print-btn" onclick="window.print()">
+                                    <i class="fa fa-print"></i> Cetak Maklumat
+                                </button>
+                            </div>
+                        `;
+                        document.getElementById('sidebar-display').innerHTML = content;
+                        
+                        // Zoom ke lot yang diklik
+                        map.flyTo(e.latlng, 19);
+                    }
+                });
             }
-        }
 
-        map.createPane('pane_bklmerge_0');
-        map.getPane('pane_bklmerge_0').style.zIndex = 450;
+            // SETUP LAYER FINALLOT
+            map.createPane('pane_finallot_1');
+            map.getPane('pane_finallot_1').style.zIndex = 401;
 
-        var layer_bklmerge_0 = new L.geoJson(json_bklmerge_0, {
-            pane: 'pane_bklmerge_0',
-            onEachFeature: pop_bklmerge_0,
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, style_bklmerge_0_0());
-            },
-        });
-        map.addLayer(layer_bklmerge_0);
-
-        // --- LAYER 1: FINALLOT (POLYGONS) ---
-        function pop_finallot_1(feature, layer) {
-            layer.on({
-                mouseover: highlightFeature,
-                mouseout: resetHighlight,
-            });
-
-            var popupContent = '<table>\
-                    <tr><td class="visible-with-data" id="NO_LOT" colspan="2"><strong>NO LOT</strong><br />' + (feature.properties['NO_LOT'] || 'N/A') + '</td></tr>\
-                    <tr><td colspan="2"><strong>KELUASAN (HA)</strong><br />' + (feature.properties['AREA'] || '-') + '</td></tr>\
-                    <tr><td colspan="2"><strong>INFO TAMBAHAN</strong><br />' + (feature.properties['tsp — ha'] || '-') + '</td></tr>\
-                </table>';
-            
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.bindPopup(content, {maxHeight: 400});
-        }
-
-        function style_finallot_1_0() {
-            return {
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
                 pane: 'pane_finallot_1',
-                opacity: 1,
-                color: '#ffffff', // Garisan putih
-                weight: 1.5,
-                fill: true,
-                fillOpacity: 0.4,
-                fillColor: '#3498db', // Warna biru moden
-                interactive: true,
-            }
-        }
+                onEachFeature: pop_finallot_1,
+                style: {
+                    opacity: 1,
+                    color: 'white',
+                    weight: 1.5,
+                    fill: true,
+                    fillOpacity: 0.3,
+                    fillColor: '#3498db',
+                    interactive: true
+                }
+            });
+            map.addLayer(layer_finallot_1);
 
-        map.createPane('pane_finallot_1');
-        map.getPane('pane_finallot_1').style.zIndex = 401;
+            // KAWALAN LAYER
+            var baseMaps = {
+                "Google Satellite": googleSat,
+                "OpenStreetMap": osm
+            };
+            
+            var overlayMaps = {
+                "Sempadan Lot": layer_finallot_1
+            };
 
-        var layer_finallot_1 = new L.geoJson(json_finallot_1, {
-            pane: 'pane_finallot_1',
-            onEachFeature: pop_finallot_1,
-            style: style_finallot_1_0,
-        });
-        map.addLayer(layer_finallot_1);
+            L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
 
-        // --- KAWALAN LAYER & CARIAN ---
-        var baseMaps = {
-            "Satelit (Google)": googleSat,
-            "Peta Jalan (OSM)": osm
-        };
-
-        var overlayMaps = {
-            "Sempadan Lot": layer_finallot_1,
-            "Titik BKL": layer_bklmerge_0
-        };
-
-        L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
-
-        map.addControl(new L.Control.Search({
-            layer: layer_finallot_1,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'NO_LOT',
-            moveToLocation: function(latlng, title, map) {
-                map.setView(latlng, 19); // Zoom lebih dekat bila jumpa lot
-            }
-        }));
-
-        // Tambah Icon Binoculars pada butang Search
-        document.getElementsByClassName('search-button')[0].innerHTML = '<i class="fa fa-binoculars" style="padding:7px"></i>';
+            // SEARCH (Cari No Lot)
+            map.addControl(new L.Control.Search({
+                layer: layer_finallot_1,
+                initial: false,
+                propertyName: 'NO_LOT',
+                textPlaceholder: 'Cari No Lot...',
+                moveToLocation: function(latlng, title, map) {
+                    map.setView(latlng, 19);
+                }
+            }));
 
         </script>
     </body>
