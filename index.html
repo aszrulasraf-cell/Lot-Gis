@@ -62,13 +62,16 @@
             .btn:hover { filter: brightness(1.2); }
             .btn-search { background: #27ae60; }
             .btn-reset { background: #c0392b; }
-            .btn-export { background: #2980b9; }
+            .btn-export { background: #2980b9; margin-top: 10px; }
             .btn-toggle { background: #8e44ad; font-size: 11px; }
 
             input#searchBox { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
             
             .leaflet-control-layers { background: #242731 !important; color: white !important; border: none !important; border-radius: 8px !important; }
         </style>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     </head>
     <body>
 
@@ -99,7 +102,7 @@
                 <div class="sidebar-section" id="data-container">
                     <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Pemilik & Lot</div>
                     <div id="data-display">
-                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta untuk maklumat terperinci.</p>
+                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta atau gunakan carian.</p>
                     </div>
                 </div>
             </div>
@@ -125,7 +128,7 @@
             var lastClickedLayer;
             var batuSempadanLayer = L.layerGroup().addTo(map);
 
-            // Fungsi highlight dan paparan data (FEATURES KEKAL)
+            // Fungsi untuk paparan data di sidebar
             function highlightFeature(e) {
                 var layer = e.target;
 
@@ -144,30 +147,44 @@
                 var props = layer.feature.properties;
                 var displayDiv = document.getElementById('data-display');
                 
-                // PENGAMBILAN DATA (Mengikut struktur fail .js anda)
-                var namaPemilik = props["tsp — pe"] || "TIADA NAMA";
+                // --- Logik Penukaran Luas ---
+                var luasAsal = props["AREA"] || 0;
+                var luasMeter = luasAsal;
+                
+                // Jika data dalam unit Ha (contoh: nilai kecil bawah 10), tukar ke m²
+                // Anda boleh tukar logik ini jika AREA dalam fail anda memang Ha
+                if (parseFloat(luasAsal) < 50) { 
+                    luasMeter = parseFloat(luasAsal) * 10000; 
+                }
+
+                var namaPemilik = props["tsp — pe"] || "TIADA MAKLUMAT";
                 var noLot = props["NO_LOT"] || "N/A";
-                var luas = props["AREA"] || "0";
 
                 displayDiv.innerHTML = `
-                    <div class="data-item">
-                        <div class="data-label">Nombor Lot</div>
-                        <div class="data-value">${noLot}</div>
+                    <div id="printable-area">
+                        <div class="data-item">
+                            <div class="data-label">Nombor Lot</div>
+                            <div class="data-value">${noLot}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Nama Pemilik</div>
+                            <div class="data-value" style="color: #f1c40f;">${namaPemilik}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Luas Lot (m²)</div>
+                            <div class="data-value">${parseFloat(luasMeter).toLocaleString(undefined, {minimumFractionDigits: 2})} m²</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Daerah</div>
+                            <div class="data-value">${props["tsp — ha"] || "TANGKAK"}</div>
+                        </div>
                     </div>
-                    <div class="data-item">
-                        <div class="data-label">Nama Pemilik</div>
-                        <div class="data-value" style="color: #f1c40f;">${namaPemilik}</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Luas Lot</div>
-                        <div class="data-value">${parseFloat(luas).toFixed(2)} m²</div>
-                    </div>
+                    <button class="btn btn-export" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
                 `;
 
                 map.fitBounds(layer.getBounds());
             }
 
-            // Memuatkan Layer Lot (KEKAL)
             var layer_finallot_1 = new L.geoJson(json_finallot_1, {
                 onEachFeature: function(feature, layer) {
                     layer.on({
@@ -182,7 +199,6 @@
                 }
             }).addTo(map);
 
-            // Memuatkan Layer Batu Sempadan (KEKAL)
             L.geoJson(json_bklmerge_0, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, {
@@ -196,7 +212,6 @@
                 }
             }).addTo(batuSempadanLayer);
 
-            // Fungsi Toggle Layer (KEKAL)
             function toggleLayer(layer) {
                 if (map.hasLayer(layer)) {
                     map.removeLayer(layer);
@@ -205,17 +220,39 @@
                 }
             }
 
-            // Fungsi Carian (KEKAL)
+            // Fungsi Carian (Kekal namun ditambah trigger paparan maklumat)
             function searchLot() {
                 var value = document.getElementById('searchBox').value;
                 var found = false;
                 layer_finallot_1.eachLayer(function(layer) {
                     if (layer.feature.properties.NO_LOT == value) {
+                        // Ini akan mencetuskan highlightFeature secara automatik
                         layer.fire('click');
                         found = true;
                     }
                 });
-                if (!found) alert("No Lot tidak dijumpai.");
+                if (!found) alert("No Lot " + value + " tidak dijumpai.");
+            }
+
+            // Fungsi Export PDF Baru
+            async function exportToPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const element = document.getElementById('printable-area');
+                
+                doc.setFontSize(18);
+                doc.setTextColor(45, 90, 39);
+                doc.text("Laporan Maklumat Lot Tanah", 20, 20);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("Sistem Maklumat Lot Tanah Politeknik Malaysia", 20, 28);
+                doc.line(20, 32, 190, 32);
+
+                const canvas = await html2canvas(element, { backgroundColor: "#1a1c23" });
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 20, 40, 100, 60);
+                
+                doc.save("Maklumat_Lot.pdf");
             }
         </script>
     </body>
