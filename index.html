@@ -49,12 +49,13 @@
                 z-index: 1001; border-left: 1px solid #333; overflow-y: auto;
             }
 
-            .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; }
+            .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
             .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; }
 
-            .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; animation: fadeIn 0.5s ease; }
-            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
-            .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; word-break: break-word; }
+            .data-item { margin-bottom: 15px; border-bottom: 1px solid #3d4250; padding-bottom: 10px; animation: fadeIn 0.5s ease; }
+            .data-label { font-size: 10px; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+            .data-value { font-size: 16px; font-weight: bold; color: #2ecc71; word-break: break-word; }
+            .value-highlight { color: #f1c40f; } /* Warna kuning untuk nama pemilik */
 
             @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -62,19 +63,16 @@
             .btn:hover { filter: brightness(1.2); }
             .btn-search { background: #27ae60; }
             .btn-reset { background: #c0392b; }
-            .btn-export { background: #2980b9; }
             .btn-toggle { background: #8e44ad; font-size: 11px; }
 
             input#searchBox { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
-            
-            .leaflet-control-layers { background: #242731 !important; color: white !important; border: none !important; border-radius: 8px !important; }
         </style>
     </head>
     <body>
 
         <header>
             <div class="header-box">
-                <img src="logo_politeknik.png" alt="Logo Politeknik Malaysia">
+                <img src="logo_politeknik.png" alt="Logo Politeknik">
                 <span class="site-title">Land Info System</span>
             </div>
         </header>
@@ -83,10 +81,9 @@
             <div id="map"></div>
 
             <div id="sidebar">
-                <div class="section-header"><i class="fas fa-cog"></i> Kawalan Features</div>
                 <div class="sidebar-section">
+                    <div class="section-header"><i class="fas fa-cog"></i> Kawalan Features</div>
                     <button class="btn btn-toggle" onclick="toggleLayer(layer_finallot_1)"><i class="fas fa-layer-group"></i> ON/OFF Lot Tanah</button>
-                    <button class="btn btn-toggle" onclick="toggleLayer(batuSempadanLayer)"><i class="fas fa-map-marker-alt"></i> ON/OFF Batu Sempadan</button>
                 </div>
 
                 <div class="sidebar-section">
@@ -105,16 +102,16 @@
             </div>
         </div>
 
-        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <script src="js/L.Control.Layers.Tree.min.js"></script>
         <script src="js/leaflet-search.js"></script>
-        
-        <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+            // 1. Inisialisasi Peta
+            var map = L.map('map', { 
+                zoomControl: true, 
+                maxZoom: 28 
+            }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
 
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
                 maxZoom: 20, 
@@ -123,6 +120,84 @@
             }).addTo(map);
 
             var lastClickedLayer;
-            var batuSempadanLayer = L.layerGroup().addTo(map);
 
-            function highlightFeature(layer
+            // 2. Fungsi Interaksi (Klik Lot)
+            function onEachLot(feature, layer) {
+                layer.on({
+                    click: function (e) {
+                        // Reset style lot sebelumnya jika ada
+                        if (lastClickedLayer) {
+                            layer_finallot_1.resetStyle(lastClickedLayer);
+                        }
+                        
+                        // Highlight lot yang baru ditekan
+                        lastClickedLayer = e.target;
+                        e.target.setStyle({
+                            color: '#f1c40f',
+                            weight: 4,
+                            fillOpacity: 0.4
+                        });
+
+                        // Kemaskini maklumat di sidebar
+                        // Sila pastikan nama properties (NO_LOT, PEMILIK, LUAS) sama seperti dalam fail .js anda
+                        var props = feature.properties;
+                        var displayDiv = document.getElementById('data-display');
+                        
+                        displayDiv.innerHTML = `
+                            <div class="data-item">
+                                <div class="data-label">Nombor Lot</div>
+                                <div class="data-value">${props.NO_LOT || 'N/A'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">Nama Pemilik</div>
+                                <div class="data-value value-highlight">${props.PEMILIK || 'NAMA TIDAK DIKENALPASTI'}</div>
+                            </div>
+                            <div class="data-item">
+                                <div class="data-label">Luas Lot</div>
+                                <div class="data-value">${props.LUAS || '0'} m²</div>
+                            </div>
+                        `;
+
+                        map.fitBounds(e.target.getBounds());
+                    }
+                });
+            }
+
+            // 3. Memasukkan Data GeoJSON
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+                onEachFeature: onEachLot,
+                style: function(feature) {
+                    return {
+                        color: '#ffffff',
+                        weight: 1.5,
+                        fillColor: '#2ecc71',
+                        fillOpacity: 0.2
+                    };
+                }
+            }).addTo(map);
+
+            // 4. Fungsi Butang Sidebar
+            function toggleLayer(layer) {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                } else {
+                    map.addLayer(layer);
+                }
+            }
+
+            function searchLot() {
+                var value = document.getElementById('searchBox').value;
+                var found = false;
+                
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == value) {
+                        layer.fire('click');
+                        found = true;
+                    }
+                });
+                
+                if (!found) alert("No Lot tidak dijumpai.");
+            }
+        </script>
+    </body>
+</html>
