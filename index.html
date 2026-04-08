@@ -7,7 +7,10 @@
         <title>Sistem Maklumat Lot Tanah Politeknik</title>
 
         <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
 
         <style>
             html, body {
@@ -26,14 +29,15 @@
             .header-box {
                 background: white; padding: 5px 25px; border-radius: 50px;
                 display: flex; align-items: center; gap: 15px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             }
 
-            .header-box img { height: 45px; }
+            .header-box img { height: 45px; width: auto; display: block; object-fit: contain; }
 
             .site-title {
                 font-family: 'Trebuchet MS', sans-serif;
-                font-size: 20px; color: #2d5a27; font-weight: bold;
-                text-transform: uppercase;
+                font-size: 22px; color: #2d5a27; 
+                font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
             }
 
             #main-container { display: flex; height: calc(100vh - 70px); width: 100%; }
@@ -46,29 +50,53 @@
             }
 
             .sidebar-section { background: #242731; padding: 15px; border-radius: 8px; }
-            .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; color: #bdc3c7; display: flex; align-items: center; gap: 8px; }
+            .section-header { font-size: 13px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #bdc3c7; }
 
-            .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
-            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; }
-            .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; }
+            .data-item { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; animation: fadeIn 0.5s ease; }
+            .data-label { font-size: 9px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+            .data-value { font-size: 15px; font-weight: bold; color: #2ecc71; margin-top: 3px; word-break: break-word; }
+
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
             .btn { width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 8px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-            .btn-toggle { background: #8e44ad; }
+            .btn:hover { filter: brightness(1.2); }
             .btn-search { background: #27ae60; }
             .btn-reset { background: #c0392b; }
             .btn-export { background: #2980b9; margin-top: 10px; }
+            .btn-toggle { background: #8e44ad; font-size: 11px; }
 
             input#searchBox { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
+            
+            .leaflet-control-layers { background: #242731 !important; color: white !important; border: none !important; border-radius: 8px !important; }
+
+            /* Gaya untuk Popup di atas Lot */
+            .leaflet-popup-content-wrapper {
+                background: #242731;
+                color: #fff;
+                border-radius: 8px;
+                padding: 5px;
+            }
+            .leaflet-popup-tip {
+                background: #242731;
+            }
+            .popup-title {
+                font-weight: bold;
+                color: #2ecc71;
+                border-bottom: 1px solid #444;
+                margin-bottom: 5px;
+                padding-bottom: 2px;
+            }
         </style>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     </head>
     <body>
 
         <header>
             <div class="header-box">
-                <img src="logo_politeknik.png" alt="Logo">
-                <span class="site-title">Jalan Jalan Survey</span>
+                <img src="logo_politeknik.png" alt="Logo Politeknik Malaysia">
+                <span class="site-title">Land Info System</span>
             </div>
         </header>
 
@@ -76,21 +104,17 @@
             <div id="map"></div>
 
             <div id="sidebar">
-                <div class="section-header"><i class="fas fa-layer-group"></i> Kawalan Lapisan</div>
+                <div class="section-header"><i class="fas fa-cog"></i> Kawalan Features</div>
                 <div class="sidebar-section">
-                    <button class="btn btn-toggle" onclick="toggleLayer(layer_finallot_1)">
-                        <i class="fas fa-map"></i> ON/OFF Lot Tanah
-                    </button>
-                    <button class="btn btn-toggle" onclick="toggleLayer(batuSempadanLayer)">
-                        <i class="fas fa-thumbtack"></i> ON/OFF Batu Sempadan
-                    </button>
+                    <button class="btn btn-toggle" onclick="toggleLayer(layer_finallot_1)"><i class="fas fa-layer-group"></i> ON/OFF Lot Tanah</button>
+                    <button class="btn btn-toggle" onclick="toggleLayer(batuSempadanLayer)"><i class="fas fa-map-marker-alt"></i> ON/OFF Batu Sempadan</button>
                 </div>
 
                 <div class="sidebar-section">
                     <div class="section-header"><i class="fas fa-search"></i> Carian</div>
                     <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
                     <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
-                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset</button>
+                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset Peta</button>
                 </div>
 
                 <div class="sidebar-section" id="data-container">
@@ -102,58 +126,54 @@
             </div>
         </div>
 
+        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        
         <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map').fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+            var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
 
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-                maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']
+                maxZoom: 20, 
+                subdomains:['mt0','mt1','mt2','mt3'],
+                attribution: 'Google Satellite'
             }).addTo(map);
 
             var lastClickedLayer;
             var batuSempadanLayer = L.layerGroup().addTo(map);
 
-            // Paparan Batu Sempadan dari GeoJSON bklmerge_0
-            L.geoJson(json_bklmerge_0, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, {
-                        radius: 4, fillColor: "#ff3300", color: "#000", weight: 1, fillOpacity: 0.8
-                    });
-                }
-            }).addTo(batuSempadanLayer);
-
+            // Fungsi untuk paparan data di sidebar & Popup
             function highlightFeature(e) {
                 var layer = e.target;
-                if (lastClickedLayer) layer_finallot_1.resetStyle(lastClickedLayer);
 
-                layer.setStyle({ weight: 5, color: '#f1c40f', fillOpacity: 0.5 });
+                if (lastClickedLayer) {
+                    layer_finallot_1.resetStyle(lastClickedLayer);
+                }
+
+                layer.setStyle({
+                    weight: 4,
+                    color: '#f1c40f',
+                    fillOpacity: 0.4
+                });
+
                 lastClickedLayer = layer;
 
                 var props = layer.feature.properties;
-                var noLot = props["NO_LOT"] || props["LOT"] || "N/A";
-                var luas = props["AREA"] || 0;
+                
+                // Logik Penukaran Luas
+                var luasAsal = props["AREA"] || 0;
+                var luasMeter = (parseFloat(luasAsal) < 50) ? (parseFloat(luasAsal) * 10000) : luasAsal;
 
-                // --- INTEGRASI XAMPP (Ambil Nama Pemilik) ---
-                // Gantikan 'get_owner.php' dengan fail PHP anda jika perlu
-                fetch(`get_owner.php?no_lot=${noLot}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        updateSidebar(noLot, data.nama || "TIADA MAKLUMAT", luas);
-                    })
-                    .catch(() => {
-                        // Jika fail PHP belum sedia, guna data dari GeoJSON atau default
-                        var namaAsal = props["NAMA"] || "POLITEKNIK MALAYSIA";
-                        updateSidebar(noLot, namaAsal, luas);
-                    });
+                var namaPemilik = props["tsp — pe"] || "TIADA MAKLUMAT";
+                var noLot = props["NO_LOT"] || "N/A";
 
-                map.fitBounds(layer.getBounds(), {padding: [50, 50]});
-            }
-
-            function updateSidebar(noLot, nama, luas) {
-                document.getElementById('data-display').innerHTML = `
+                // 1. Kemaskini Sidebar
+                var displayDiv = document.getElementById('data-display');
+                displayDiv.innerHTML = `
                     <div id="printable-area">
                         <div class="data-item">
                             <div class="data-label">Nombor Lot</div>
@@ -161,25 +181,59 @@
                         </div>
                         <div class="data-item">
                             <div class="data-label">Nama Pemilik</div>
-                            <div class="data-value" style="color: #f1c40f;">${nama}</div>
+                            <div class="data-value" style="color: #f1c40f;">${namaPemilik}</div>
                         </div>
                         <div class="data-item">
-                            <div class="data-label">Luas Lot</div>
-                            <div class="data-value">${parseFloat(luas).toFixed(0)} m²</div>
+                            <div class="data-label">Luas Lot (m²)</div>
+                            <div class="data-value">${parseFloat(luasMeter).toLocaleString(undefined, {minimumFractionDigits: 2})} m²</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Daerah</div>
+                            <div class="data-value">${props["tsp — ha"] || "TANGKAK"}</div>
                         </div>
                     </div>
-                    <button class="btn btn-export" onclick="alert('Fungsi Export PDF sedia!')"><i class="fas fa-file-pdf"></i> Export to PDF</button>
+                    <button class="btn btn-export" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
                 `;
+
+                // 2. Paparkan Popup di atas Lot
+                layer.bindPopup(`
+                    <div style="font-size:12px;">
+                        <div class="popup-title">LOT: ${noLot}</div>
+                        <b>Pemilik:</b> ${namaPemilik}<br>
+                        <b>Luas:</b> ${parseFloat(luasMeter).toFixed(2)} m²
+                    </div>
+                `).openPopup();
+
+                map.fitBounds(layer.getBounds());
             }
 
-            var layer_finallot_1 = L.geoJson(json_finallot_1, {
-                style: { color: '#ffffff', weight: 1, fillColor: '#2ecc71', fillOpacity: 0.2 },
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
                 onEachFeature: function(feature, layer) {
-                    layer.on({ click: highlightFeature });
+                    layer.on({
+                        click: highlightFeature
+                    });
+                },
+                style: {
+                    color: '#ffffff',
+                    weight: 1,
+                    fillColor: '#2ecc71',
+                    fillOpacity: 0.2
                 }
             }).addTo(map);
 
-            // Fungsi ON/OFF Lapisan
+            L.geoJson(json_bklmerge_0, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 4,
+                        fillColor: "#ff3300",
+                        color: "#000",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                }
+            }).addTo(batuSempadanLayer);
+
             function toggleLayer(layer) {
                 if (map.hasLayer(layer)) {
                     map.removeLayer(layer);
@@ -188,17 +242,36 @@
                 }
             }
 
-            // Fungsi Carian
             function searchLot() {
-                var val = document.getElementById('searchBox').value.trim();
+                var value = document.getElementById('searchBox').value;
                 var found = false;
-                layer_finallot_1.eachLayer(function(l) {
-                    if (l.feature.properties.NO_LOT == val || l.feature.properties.LOT == val) {
-                        l.fire('click');
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == value) {
+                        layer.fire('click');
                         found = true;
                     }
                 });
-                if (!found) alert("No Lot " + val + " tidak dijumpai.");
+                if (!found) alert("No Lot " + value + " tidak dijumpai.");
+            }
+
+            async function exportToPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const element = document.getElementById('printable-area');
+                
+                doc.setFontSize(18);
+                doc.setTextColor(45, 90, 39);
+                doc.text("Laporan Maklumat Lot Tanah", 20, 20);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("Sistem Maklumat Lot Tanah Politeknik Malaysia", 20, 28);
+                doc.line(20, 32, 190, 32);
+
+                const canvas = await html2canvas(element, { backgroundColor: "#1a1c23" });
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 20, 40, 100, 60);
+                
+                doc.save("Maklumat_Lot_" + (lastClickedLayer ? lastClickedLayer.feature.properties.NO_LOT : "Tanah") + ".pdf");
             }
         </script>
     </body>
