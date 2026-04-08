@@ -63,20 +63,10 @@
             .btn-search { background: #27ae60; }
             .btn-reset { background: #c0392b; }
             .btn-toggle { background: #8e44ad; font-size: 11px; }
-            .btn-labels { background: #f39c12; font-size: 11px; }
 
             input#searchBox { width: 100%; padding: 12px; background: #111; border: 1px solid #444; color: #fff; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
             
-            /* Custom Label Style */
-            .lot-label {
-                background: rgba(0,0,0,0.7);
-                border: 1px solid #2ecc71;
-                color: #fff;
-                font-weight: bold;
-                font-size: 10px;
-                padding: 2px 5px;
-                border-radius: 4px;
-            }
+            .leaflet-control-layers { background: #242731 !important; color: white !important; border: none !important; border-radius: 8px !important; }
         </style>
     </head>
     <body>
@@ -92,103 +82,133 @@
             <div id="map"></div>
 
             <div id="sidebar">
-                <div class="section-header"><i class="fas fa-cog"></i> Kawalan Lapisan</div>
+                <div class="section-header"><i class="fas fa-cog"></i> Kawalan Features</div>
                 <div class="sidebar-section">
-                    <button class="btn btn-toggle" onclick="toggleLayer(layer_finallot_1)"><i class="fas fa-layer-group"></i> Lot Tanah</button>
-                    <button class="btn btn-toggle" onclick="toggleLayer(batuSempadanLayer)"><i class="fas fa-map-marker-alt"></i> Batu Sempadan</button>
-                    <button class="btn btn-labels" onclick="toggleLabels()"><i class="fas fa-tag"></i> ON/OFF Label (No/Luas)</button>
+                    <button class="btn btn-toggle" onclick="toggleLayer(layer_finallot_1)"><i class="fas fa-layer-group"></i> ON/OFF Lot Tanah</button>
+                    <button class="btn btn-toggle" onclick="toggleLayer(batuSempadanLayer)"><i class="fas fa-map-marker-alt"></i> ON/OFF Batu Sempadan</button>
                 </div>
 
                 <div class="sidebar-section">
                     <div class="section-header"><i class="fas fa-search"></i> Carian</div>
                     <input type="text" id="searchBox" placeholder="Masukkan No Lot...">
                     <button class="btn btn-search" onclick="searchLot()"><i class="fas fa-search"></i> Cari Lot</button>
-                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset</button>
+                    <button class="btn btn-reset" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Reset Peta</button>
                 </div>
 
                 <div class="sidebar-section" id="data-container">
-                    <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Terperinci</div>
+                    <div class="section-header"><i class="fas fa-info-circle"></i> Maklumat Pemilik & Lot</div>
                     <div id="data-display">
-                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Pilih lot untuk maklumat lanjut.</p>
+                        <p style="color:#7f8c8d; font-size:12px; text-align:center;">Klik lot pada peta untuk maklumat terperinci.</p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        
+        <script src="data/bklmerge_0.js"></script>
         <script src="data/finallot_1.js"></script>
 
         <script>
-            var map = L.map('map', { zoomControl: true }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
+            var map = L.map('map', { zoomControl: true, maxZoom: 28 }).fitBounds([[2.1025, 102.5206], [2.1047, 102.5246]]);
 
             var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-                maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3']
+                maxZoom: 20, 
+                subdomains:['mt0','mt1','mt2','mt3'],
+                attribution: 'Google Satellite'
             }).addTo(map);
 
-            var batuSempadanLayer = L.layerGroup().addTo(map);
             var lastClickedLayer;
-            var labelsEnabled = false;
+            var batuSempadanLayer = L.layerGroup().addTo(map);
 
-            function onEachFeature(feature, layer) {
-                var props = feature.properties;
-                var lotNo = props.NO_LOT || props.LOT || "N/A";
-                var area = props.AREA || props.area || "0";
+            // Fungsi utama untuk memaparkan data di sidebar
+            function highlightFeature(e) {
+                var layer = e.target;
 
-                // Tambah Label (Tooltip) secara sembunyi pada mulanya
-                layer.bindTooltip(`Lot: ${lotNo}<br>Luas: ${area} HA`, {
-                    permanent: true, direction: 'center', className: 'lot-label'
-                });
-                layer.closeTooltip();
-
-                // Generate Batu Sempadan
-                if (feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')) {
-                    var coords = feature.geometry.type === 'MultiPolygon' ? feature.geometry.coordinates[0][0] : feature.geometry.coordinates[0];
-                    coords.forEach(c => {
-                        L.circleMarker([c[1], c[0]], { radius: 3, color: 'white', fillColor: 'red', fillOpacity: 1 }).addTo(batuSempadanLayer);
-                    });
+                if (lastClickedLayer) {
+                    layer_finallot_1.resetStyle(lastClickedLayer);
                 }
 
-                layer.on('click', function() {
-                    if (lastClickedLayer) layer_finallot_1.resetStyle(lastClickedLayer);
-                    layer.setStyle({ color: '#f1c40f', weight: 5, fillOpacity: 0.5 });
-                    lastClickedLayer = layer;
-
-                    // Cari nama pemilik secara dinamik
-                    var nameKey = Object.keys(props).find(k => ['NAMA','PEMILIK','OWNER'].includes(k.toUpperCase()));
-                    var owner = props[nameKey] || "POLITEKNIK MALAYSIA";
-
-                    document.getElementById('data-display').innerHTML = `
-                        <div class="data-item"><div class="data-label">NO LOT</div><div class="data-value">${lotNo}</div></div>
-                        <div class="data-item"><div class="data-label">PEMILIK</div><div class="data-value" style="color:#f1c40f;">${owner}</div></div>
-                        <div class="data-item"><div class="data-label">KELUASAN</div><div class="data-value">${area} HA</div></div>
-                    `;
-                    map.fitBounds(layer.getBounds(), {padding: [30, 30]});
+                layer.setStyle({
+                    weight: 4,
+                    color: '#f1c40f',
+                    fillOpacity: 0.4
                 });
+
+                lastClickedLayer = layer;
+
+                // Mengambil data dari properties file finallot_1.js
+                var props = layer.feature.properties;
+                var displayDiv = document.getElementById('data-display');
+                
+                displayDiv.innerHTML = `
+                    <div class="data-item">
+                        <div class="data-label">Nombor Lot</div>
+                        <div class="data-value">${props.NO_LOT || 'N/A'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Nama Pemilik</div>
+                        <div class="data-value" style="color: #f1c40f;">${props["tsp — pe"] || 'TIADA NAMA'}</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Luas Lot</div>
+                        <div class="data-value">${props.AREA ? parseFloat(props.AREA).toFixed(2) : '0.00'} m²</div>
+                    </div>
+                `;
+
+                map.fitBounds(layer.getBounds());
             }
 
-            var layer_finallot_1 = L.geoJson(json_finallot_1, {
-                style: { color: '#2ecc71', weight: 2, fillOpacity: 0.2 },
-                onEachFeature: onEachFeature
+            var layer_finallot_1 = new L.geoJson(json_finallot_1, {
+                onEachFeature: function(feature, layer) {
+                    layer.on({
+                        click: highlightFeature
+                    });
+                },
+                style: {
+                    color: '#ffffff',
+                    weight: 1,
+                    fillColor: '#2ecc71',
+                    fillOpacity: 0.2
+                }
             }).addTo(map);
 
-            function toggleLabels() {
-                labelsEnabled = !labelsEnabled;
-                layer_finallot_1.eachLayer(l => labelsEnabled ? l.openTooltip() : l.closeTooltip());
+            // Menambah batu sempadan dari bklmerge_0.js secara automatik
+            L.geoJson(json_bklmerge_0, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 3,
+                        fillColor: "#ff3300",
+                        color: "#000",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                }
+            }).addTo(batuSempadanLayer);
+
+            function toggleLayer(layer) {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                } else {
+                    map.addLayer(layer);
+                }
             }
 
             function searchLot() {
-                var val = document.getElementById('searchBox').value.trim();
+                var value = document.getElementById('searchBox').value;
                 var found = false;
-                layer_finallot_1.eachLayer(l => {
-                    if (l.feature.properties.NO_LOT == val || l.feature.properties.LOT == val) {
-                        l.fire('click');
+                layer_finallot_1.eachLayer(function(layer) {
+                    if (layer.feature.properties.NO_LOT == value) {
+                        layer.fire('click');
                         found = true;
                     }
                 });
-                if(!found) alert("Lot tidak dijumpai.");
+                if (!found) alert("No Lot tidak dijumpai.");
             }
-
-            function toggleLayer(l) { map.hasLayer(l) ? map.removeLayer(l) : map.addLayer(l); }
         </script>
     </body>
 </html>
